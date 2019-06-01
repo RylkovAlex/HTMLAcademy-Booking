@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Alexander Rylkov](https://up.htmlacademy.ru/javascript/17/user/859429).
-* Наставник: `Неизвестно`.
+* Наставник: [Александр Тимоновский](https://htmlacademy.ru/profile/id768125).
 
 ---
 
