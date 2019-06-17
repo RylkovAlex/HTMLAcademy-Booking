@@ -1,10 +1,20 @@
 'use strict';
-
+// основная форма для создания объявления
+var adForm = document.querySelector('.ad-form');
+var adFormHeader = adForm.querySelector('.ad-form-header');
+var adFormFieldsets = adForm.querySelectorAll('.ad-form__element');
+var adFormAddress = adForm.querySelector('#address');
+// форма с фильтрами
+var filtersForm = document.querySelector('.map__filters');
+var filters = filtersForm.querySelectorAll('.map__filter');
+var features = filtersForm.querySelector('.map__features');
+// Карта и параметры меток
 var MAP_PIN_WIDTH = 50;
-var MAP_PIN_HIGHT = 70;
+var MAP_PIN_HEIGHT = 70;
 var mapBlock = document.querySelector('.map');
-mapBlock.classList.remove('map--faded');
-
+var pinMain = mapBlock.querySelector('.map__pin--main');
+var pinMainLocationX;
+var pinMainLocationY;
 // шаблон .map__pin
 var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 
@@ -25,7 +35,7 @@ function getPin(n) {
   };
   pin.location = {
     x: getRandomInt(MAP_PIN_WIDTH, mapBlock.offsetWidth - MAP_PIN_WIDTH),
-    y: getRandomInt(130 + MAP_PIN_HIGHT, 630)
+    y: getRandomInt(130 + MAP_PIN_HEIGHT, 630)
   };
   return pin;
 }
@@ -46,7 +56,7 @@ var PinsMock = getPinsMock(8);
 // создаёт DOM-элемент map__pin из шаблона
 function renderPin(pin) {
   var pinElement = mapPinTemplate.cloneNode(true);
-  pinElement.style = 'left: ' + (pin.location.x - Math.floor(MAP_PIN_WIDTH / 2)) + 'px; top: ' + (pin.location.y - MAP_PIN_HIGHT) + 'px;';
+  pinElement.style = 'left: ' + (pin.location.x - Math.floor(MAP_PIN_WIDTH / 2)) + 'px; top: ' + (pin.location.y - MAP_PIN_HEIGHT) + 'px;';
   pinElement.firstElementChild.src = pin.author.avatar;
   pinElement.firstElementChild.alt = pin.offer.type;
 
@@ -63,5 +73,55 @@ function getPinsFragment() {
   return fragment;
 }
 
-// Вставка в DOM:
-document.querySelector(' .map__pins').appendChild(getPinsFragment());
+// записывает координаты главной метки в input с адресом
+function writePinMainLocation() {
+  adFormAddress.value = pinMainLocationX + ',' + pinMainLocationY;
+}
+
+// переход в исходное (неактивное состояние страницы)
+function switchPageToInitialState() {
+  adFormHeader.disabled = true;
+  for (var i = 0; i < adFormFieldsets.length; i++) {
+    adFormFieldsets[i].disabled = true;
+  }
+  //
+  features.disabled = true;
+  for (i = 0; i < filters.length; i++) {
+    filters[i].disabled = true;
+  }
+  //
+  mapBlock.classList.add('map--faded');
+  adForm.classList.add('ad-form--disabled');
+  // вычислеие координат главной метки
+  pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
+  pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight / 2);
+  // запись координат метки в input
+  writePinMainLocation();
+}
+
+// переход в акивное состояние страницы
+function swithPageToActiveState() {
+  adFormHeader.disabled = false;
+  for (var i = 0; i < adFormFieldsets.length; i++) {
+    adFormFieldsets[i].disabled = false;
+  }
+  //
+  features.disabled = false;
+  for (i = 0; i < filters.length; i++) {
+    filters[i].disabled = false;
+  }
+  //
+  mapBlock.classList.remove('map--faded');
+  adForm.classList.remove('ad-form--disabled');
+  // вычислеие координат главной метки
+  pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
+  // TODO: я не учитывал свойство transform для псевдоэлемента, если его учесть, то нужно ещё на 6px уменьшить координату по Y:
+  pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight + parseInt(getComputedStyle(pinMain, '::after').height, 10));
+  // запись координат метки в input
+  writePinMainLocation();
+  // Вставка в DOM фрагмента с метками:
+  document.querySelector(' .map__pins').appendChild(getPinsFragment());
+}
+
+switchPageToInitialState();
+pinMain.addEventListener('click', swithPageToActiveState);
