@@ -123,5 +123,38 @@ function swithPageToActiveState() {
   document.querySelector(' .map__pins').appendChild(getPinsFragment());
 }
 
+// валидация полей формы
+var houseTypeInput = adForm.querySelector('#type');
+var hosePriceInput = adForm.querySelector('#price');
+var houseTypes = [
+  {
+    type: 'bungalo',
+    minPrice: '0'
+  },
+  {
+    type: 'flat',
+    minPrice: '1000'
+  },
+  {
+    type: 'house',
+    minPrice: '5000'
+  },
+  {
+    type: 'palace',
+    minPrice: '10000'
+  }
+];
+
+// в зависимости от типа жилья меняет цену
+function checkPriceInput() {
+  for (var i = 0; i < houseTypes.length; i++) {
+    if (houseTypes[i].type === houseTypeInput.value) {
+      hosePriceInput.placeholder = houseTypes[i].minPrice;
+      houseTypeInput.min = houseTypes[i].minPrice;
+    }
+  }
+}
+
 switchPageToInitialState();
 pinMain.addEventListener('click', swithPageToActiveState);
+houseTypeInput.addEventListener('change', checkPriceInput);
