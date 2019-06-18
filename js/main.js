@@ -123,9 +123,14 @@ function swithPageToActiveState() {
   document.querySelector(' .map__pins').appendChild(getPinsFragment());
 }
 
-// валидация полей формы
+// ВАЛИДАЦИЯ полей формы
 var houseTypeInput = adForm.querySelector('#type');
 var hosePriceInput = adForm.querySelector('#price');
+var timeIn = adForm.querySelector('#timein');
+var timeOut = adForm.querySelector('#timeout');
+var timeInOptions = timeIn.getElementsByTagName('option');
+var timeOutOptions = timeOut.getElementsByTagName('option');
+
 var houseTypes = [
   {
     type: 'bungalo',
@@ -155,6 +160,26 @@ function checkPriceInput() {
   }
 }
 
+// синхронизирует время заезда и выезда
+function setTimeOutAsTimeIn() {
+  for (var i = 0; i < timeInOptions.length; i++) {
+    if (timeInOptions[i].selected) {
+      timeOutOptions[i].selected = true;
+    }
+  }
+}
+
+function setTimeInAsTimeOut() {
+  for (var i = 0; i < timeOutOptions.length; i++) {
+    if (timeOutOptions[i].selected) {
+      timeInOptions[i].selected = true;
+    }
+  }
+}
+
+// Запускаем обработчики
 switchPageToInitialState();
 pinMain.addEventListener('click', swithPageToActiveState);
 houseTypeInput.addEventListener('change', checkPriceInput);
+timeIn.addEventListener('change', setTimeOutAsTimeIn);
+timeOut.addEventListener('change', setTimeInAsTimeOut);
