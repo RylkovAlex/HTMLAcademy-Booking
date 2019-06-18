@@ -128,6 +128,7 @@ var houseTypeInput = adForm.querySelector('#type');
 var hosePriceInput = adForm.querySelector('#price');
 var timeIn = adForm.querySelector('#timein');
 var timeOut = adForm.querySelector('#timeout');
+// TODO: не знаю, можно ли использовать getElementsByTagName, вроде рекомендовали только querySelector,а как им по тэгу искать я не понял
 var timeInOptions = timeIn.getElementsByTagName('option');
 var timeOutOptions = timeOut.getElementsByTagName('option');
 
@@ -161,6 +162,7 @@ function checkPriceInput() {
 }
 
 // синхронизирует время заезда и выезда
+// TODO: может стоит в одну функцию следующие две объеденить
 function setTimeOutAsTimeIn() {
   for (var i = 0; i < timeInOptions.length; i++) {
     if (timeInOptions[i].selected) {
@@ -179,7 +181,7 @@ function setTimeInAsTimeOut() {
 
 // Запускаем обработчики
 switchPageToInitialState();
-pinMain.addEventListener('click', swithPageToActiveState);
+pinMain.addEventListener('click', swithPageToActiveState); // TODO: здесь вроде надо обрабатывать не клик, а mouseup
 houseTypeInput.addEventListener('change', checkPriceInput);
 timeIn.addEventListener('change', setTimeOutAsTimeIn);
 timeOut.addEventListener('change', setTimeInAsTimeOut);
