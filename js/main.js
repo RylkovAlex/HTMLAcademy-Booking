@@ -156,7 +156,7 @@ function checkPriceInput() {
   for (var i = 0; i < houseTypes.length; i++) {
     if (houseTypes[i].type === houseTypeInput.value) {
       hosePriceInput.placeholder = houseTypes[i].minPrice;
-      houseTypeInput.min = houseTypes[i].minPrice;
+      hosePriceInput.min = houseTypes[i].minPrice;
     }
   }
 }
@@ -181,7 +181,7 @@ function setTimeInAsTimeOut() {
 
 // Запускаем обработчики
 switchPageToInitialState();
-pinMain.addEventListener('click', swithPageToActiveState); // TODO: здесь вроде надо обрабатывать не клик, а mouseup
+pinMain.addEventListener('click', swithPageToActiveState);
 houseTypeInput.addEventListener('change', checkPriceInput);
 timeIn.addEventListener('change', setTimeOutAsTimeIn);
 timeOut.addEventListener('change', setTimeInAsTimeOut);
