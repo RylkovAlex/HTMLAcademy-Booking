@@ -128,9 +128,8 @@ var houseTypeInput = adForm.querySelector('#type');
 var hosePriceInput = adForm.querySelector('#price');
 var timeIn = adForm.querySelector('#timein');
 var timeOut = adForm.querySelector('#timeout');
-// TODO: не знаю, можно ли использовать getElementsByTagName, вроде рекомендовали только querySelector,а как им по тэгу искать я не понял
-var timeInOptions = timeIn.getElementsByTagName('option');
-var timeOutOptions = timeOut.getElementsByTagName('option');
+var timeInOptions = timeIn.querySelectorAll('option');
+var timeOutOptions = timeOut.querySelectorAll('option');
 
 var houseTypes = [
   {
@@ -156,7 +155,7 @@ function checkPriceInput() {
   for (var i = 0; i < houseTypes.length; i++) {
     if (houseTypes[i].type === houseTypeInput.value) {
       hosePriceInput.placeholder = houseTypes[i].minPrice;
-      houseTypeInput.min = houseTypes[i].minPrice;
+      hosePriceInput.min = houseTypes[i].minPrice;
     }
   }
 }
@@ -181,7 +180,7 @@ function setTimeInAsTimeOut() {
 
 // Запускаем обработчики
 switchPageToInitialState();
-pinMain.addEventListener('click', swithPageToActiveState); // TODO: здесь вроде надо обрабатывать не клик, а mouseup
+pinMain.addEventListener('click', swithPageToActiveState);
 houseTypeInput.addEventListener('change', checkPriceInput);
 timeIn.addEventListener('change', setTimeOutAsTimeIn);
 timeOut.addEventListener('change', setTimeInAsTimeOut);
