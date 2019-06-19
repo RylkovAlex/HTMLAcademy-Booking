@@ -129,8 +129,8 @@ var hosePriceInput = adForm.querySelector('#price');
 var timeIn = adForm.querySelector('#timein');
 var timeOut = adForm.querySelector('#timeout');
 // TODO: не знаю, можно ли использовать getElementsByTagName, вроде рекомендовали только querySelector,а как им по тэгу искать я не понял
-var timeInOptions = timeIn.getElementsByTagName('option');
-var timeOutOptions = timeOut.getElementsByTagName('option');
+var timeInOptions = timeIn.querySelectorAll('option');
+var timeOutOptions = timeOut.querySelectorAll('option');
 
 var houseTypes = [
   {
