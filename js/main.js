@@ -4,6 +4,7 @@ var adForm = document.querySelector('.ad-form');
 var adFormHeader = adForm.querySelector('.ad-form-header');
 var adFormFieldsets = adForm.querySelectorAll('.ad-form__element');
 var adFormAddress = adForm.querySelector('#address');
+var isFormActive = false;
 // форма с фильтрами
 var filtersForm = document.querySelector('.map__filters');
 var filters = filtersForm.querySelectorAll('.map__filter');
@@ -13,8 +14,10 @@ var MAP_PIN_WIDTH = 50;
 var MAP_PIN_HEIGHT = 70;
 var mapBlock = document.querySelector('.map');
 var pinMain = mapBlock.querySelector('.map__pin--main');
+var PIN_MAIN_MARKER_TRANSLATE_Y = -6; // transform у псевдоэлемента, для вычисления точных размеров метки
 var pinMainLocationX;
 var pinMainLocationY;
+var wasPinMoved = false;
 // шаблон .map__pin
 var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 
@@ -74,7 +77,15 @@ function getPinsFragment() {
 }
 
 // записывает координаты главной метки в input с адресом
-function writePinMainLocation() {
+function writePinMainLocationToInput() {
+  // вычислеие координат главной метки
+  if (isFormActive) {
+    pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
+    pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight + parseInt(getComputedStyle(pinMain, '::after').height, 10) + PIN_MAIN_MARKER_TRANSLATE_Y);
+  }
+  pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
+  pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight / 2);
+  // запись в инпут
   adFormAddress.value = pinMainLocationX + ',' + pinMainLocationY;
 }
 
@@ -92,15 +103,10 @@ function switchPageToInitialState() {
   //
   mapBlock.classList.add('map--faded');
   adForm.classList.add('ad-form--disabled');
-  // вычислеие координат главной метки
-  pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
-  pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight / 2);
-  // запись координат метки в input
-  writePinMainLocation();
 }
 
 // переход в акивное состояние страницы
-function swithPageToActiveState() {
+function startPageToActiveState() {
   adFormHeader.disabled = false;
   for (var i = 0; i < adFormFieldsets.length; i++) {
     adFormFieldsets[i].disabled = false;
@@ -113,15 +119,22 @@ function swithPageToActiveState() {
   //
   mapBlock.classList.remove('map--faded');
   adForm.classList.remove('ad-form--disabled');
-  // вычислеие координат главной метки
-  pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
-  // TODO: я не учитывал свойство transform для псевдоэлемента, если его учесть, то нужно ещё на 6px уменьшить координату по Y:
-  pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight + parseInt(getComputedStyle(pinMain, '::after').height, 10));
-  // запись координат метки в input
-  writePinMainLocation();
   // Вставка в DOM фрагмента с метками:
   document.querySelector(' .map__pins').appendChild(getPinsFragment());
+  // Обработчики на поля формы:
+  houseTypeInput.addEventListener('change', checkPriceInput);
+  timeIn.addEventListener('change', setTimeOutAsTimeIn);
+  timeOut.addEventListener('change', setTimeInAsTimeOut);
 }
+
+function startPage() {
+  writePinMainLocationToInput();
+  if (wasPinMoved) {
+    startPageToActiveState();
+  }
+}
+
+startPage();
 
 // ВАЛИДАЦИЯ полей формы
 var houseTypeInput = adForm.querySelector('#type');
@@ -180,7 +193,65 @@ function setTimeInAsTimeOut() {
 
 // Запускаем обработчики
 switchPageToInitialState();
-pinMain.addEventListener('click', swithPageToActiveState);
-houseTypeInput.addEventListener('change', checkPriceInput);
-timeIn.addEventListener('change', setTimeOutAsTimeIn);
-timeOut.addEventListener('change', setTimeInAsTimeOut);
+
+// вычисляет координаты элемента относительно страницы
+function getCoords(elem) {
+  var box = elem.getBoundingClientRect();
+  return {
+    top: box.top + pageYOffset,
+    left: box.left + pageXOffset
+  };
+}
+
+
+pinMain.ondragstart = function () {
+  return false;
+};
+
+pinMain.addEventListener('mousedown', function (mousedownEvt) {
+  var coords = getCoords(pinMain);
+  // вычисляю смещение курсора относительно элемента
+  var shiftX = mousedownEvt.pageX - coords.left;
+  var shiftY = mousedownEvt.pageY - coords.top;
+
+  pinMain.style.position = 'absolute';
+  document.body.appendChild(pinMain);
+  moveAt(mousedownEvt);
+
+  pinMain.style.zIndex = 1000; // над другими элементами
+
+  function moveAt(e) {
+    pinMain.style.left = e.pageX - shiftX + 'px';
+    pinMain.style.top = e.pageY - shiftY + 'px';
+  }
+
+  function buttonMoveHandler(moveEvt) {
+    wasPinMoved = true;
+    moveAt(moveEvt);
+    writePinMainLocationToInput();
+  }
+
+  // первое перемещение метки переводит страницу в активное состояние:
+  function buttonStartMove() {
+    startPageToActiveState();
+    document.removeEventListener('mousemove', buttonStartMove);
+  }
+
+  function buttonMouseUpHandler() {
+    document.removeEventListener('mousemove', buttonMoveHandler);
+    document.removeEventListener('mouseup', buttonMouseUpHandler);
+    document.removeEventListener('mousemove', buttonStartMove);
+  }
+
+  document.addEventListener('mousemove', buttonMoveHandler);
+  document.addEventListener('mousemove', buttonStartMove);
+  document.addEventListener('mouseup', buttonMouseUpHandler);
+
+});
+
+pinMain.ondragstart = function () {
+  return false;
+};
+
+
+// pinMain.addEventListener('click', swithPageToActiveState);
