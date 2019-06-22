@@ -2,7 +2,7 @@
 // основная форма для создания объявления
 var adForm = document.querySelector('.ad-form');
 var adFormHeader = adForm.querySelector('.ad-form-header');
-var adFormFieldsets = adForm.querySelectorAll('.ad-form__element');
+var adFormFieldsets = adForm.querySelectorAll('.ad-form__pinMain');
 var adFormAddress = adForm.querySelector('#address');
 var isFormActive = false;
 // форма с фильтрами
@@ -10,11 +10,14 @@ var filtersForm = document.querySelector('.map__filters');
 var filters = filtersForm.querySelectorAll('.map__filter');
 var features = filtersForm.querySelector('.map__features');
 // Карта и параметры меток
+var TOP_BORDER = 130;
+var LOWER_BORDER = 630;
 var MAP_PIN_WIDTH = 50;
 var MAP_PIN_HEIGHT = 70;
 var mapBlock = document.querySelector('.map');
 var pinMain = mapBlock.querySelector('.map__pin--main');
 var PIN_MAIN_MARKER_TRANSLATE_Y = -6; // transform у псевдоэлемента, для вычисления точных размеров метки
+var pinMainHeight = pinMain.offsetHeight + parseInt(getComputedStyle(pinMain, '::after').height, 10) + PIN_MAIN_MARKER_TRANSLATE_Y;
 var pinMainLocationX;
 var pinMainLocationY;
 var wasPinMoved = false;
@@ -38,7 +41,7 @@ function getPin(n) {
   };
   pin.location = {
     x: getRandomInt(MAP_PIN_WIDTH, mapBlock.offsetWidth - MAP_PIN_WIDTH),
-    y: getRandomInt(130 + MAP_PIN_HEIGHT, 630)
+    y: getRandomInt(TOP_BORDER + MAP_PIN_HEIGHT, LOWER_BORDER)
   };
   return pin;
 }
@@ -81,7 +84,7 @@ function writePinMainLocationToInput() {
   // вычислеие координат главной метки
   if (isFormActive) {
     pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
-    pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight + parseInt(getComputedStyle(pinMain, '::after').height, 10) + PIN_MAIN_MARKER_TRANSLATE_Y);
+    pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight + pinMainHeight);
   }
   pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
   pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight / 2);
@@ -104,6 +107,7 @@ function switchPageToInitialState() {
   mapBlock.classList.add('map--faded');
   adForm.classList.add('ad-form--disabled');
 }
+switchPageToInitialState();
 
 // переход в акивное состояние страницы
 function startPageToActiveState() {
@@ -174,7 +178,6 @@ function checkPriceInput() {
 }
 
 // синхронизирует время заезда и выезда
-// TODO: может стоит в одну функцию следующие две объеденить
 function setTimeOutAsTimeIn() {
   for (var i = 0; i < timeInOptions.length; i++) {
     if (timeInOptions[i].selected) {
@@ -191,60 +194,76 @@ function setTimeInAsTimeOut() {
   }
 }
 
-// Запускаем обработчики
-switchPageToInitialState();
-
 // вычисляет координаты элемента относительно страницы
 function getCoords(elem) {
   var box = elem.getBoundingClientRect();
   return {
     top: box.top + pageYOffset,
-    left: box.left + pageXOffset
+    left: box.left + pageXOffset,
+    right: box.left + pageXOffset + elem.offsetWidth,
+    bottom: box.top + pageYOffset + elem.offsetHeight
   };
 }
 
-
-pinMain.ondragstart = function () {
-  return false;
-};
+var pinMainMoveContainer = document.querySelector('.map__pins');
+var pinMainMoveZone = getCoords(pinMainMoveContainer);
 
 pinMain.addEventListener('mousedown', function (mousedownEvt) {
-  var coords = getCoords(pinMain);
-  // вычисляю смещение курсора относительно элемента
-  var shiftX = mousedownEvt.pageX - coords.left;
-  var shiftY = mousedownEvt.pageY - coords.top;
-
+  // текущие координаты метки:
+  var pinMainCoords = getCoords(pinMain);
+  // текущие координаты курсора
+  var Coords = {
+    x: mousedownEvt.clientX,
+    y: mousedownEvt.clientY
+  };
+  // смещение курсора относительно левого-верхнего угла элемента
+  var shiftX = mousedownEvt.clientX - pinMainCoords.left;
+  var shiftY = mousedownEvt.clientY - pinMainCoords.top;
+  // подготовка к перемещению
   pinMain.style.position = 'absolute';
-  document.body.appendChild(pinMain);
-  moveAt(mousedownEvt);
-
-  pinMain.style.zIndex = 1000; // над другими элементами
-
-  function moveAt(e) {
-    pinMain.style.left = e.pageX - shiftX + 'px';
-    pinMain.style.top = e.pageY - shiftY + 'px';
-  }
-
+  pinMain.style.zIndex = 10;
+  // реализует перемещение
   function buttonMoveHandler(moveEvt) {
     wasPinMoved = true;
-    moveAt(moveEvt);
-    writePinMainLocationToInput();
+    moveEvt.preventDefault();
+    // расчёт смещения
+    var shift = {
+      x: Coords.x - moveEvt.clientX,
+      y: Coords.y - moveEvt.clientY
+    };
+    // границы области для перемещения
+    if ((moveEvt.clientX > pinMainMoveZone.left + shiftX) &&
+        (moveEvt.clientX < pinMainMoveZone.right - pinMain.offsetWidth + shiftX) &&
+        (moveEvt.clientY < pinMainMoveZone.bottom - pinMainHeight + shiftY) &&
+        (moveEvt.clientY > pinMainMoveZone.top + shiftY + TOP_BORDER)
+    ) {
+      // перезапись координат курсора
+      Coords = {
+        x: moveEvt.clientX,
+        y: moveEvt.clientY
+      };
+      // перемещение элемента на вычисленное смещение
+      pinMain.style.top = (pinMain.offsetTop - shift.y) + 'px';
+      pinMain.style.left = (pinMain.offsetLeft - shift.x) + 'px';
+      // запись координат метки в инпут
+      writePinMainLocationToInput();
+    }
   }
 
   // первое перемещение метки переводит страницу в активное состояние:
-  function buttonStartMove() {
+  function buttonStartMoveHandler() {
     startPageToActiveState();
-    document.removeEventListener('mousemove', buttonStartMove);
+    document.removeEventListener('mousemove', buttonStartMoveHandler);
   }
 
   function buttonMouseUpHandler() {
     document.removeEventListener('mousemove', buttonMoveHandler);
     document.removeEventListener('mouseup', buttonMouseUpHandler);
-    document.removeEventListener('mousemove', buttonStartMove);
+    document.removeEventListener('mousemove', buttonStartMoveHandler);
   }
 
   document.addEventListener('mousemove', buttonMoveHandler);
-  document.addEventListener('mousemove', buttonStartMove);
+  document.addEventListener('mousemove', buttonStartMoveHandler);
   document.addEventListener('mouseup', buttonMouseUpHandler);
 
 });
