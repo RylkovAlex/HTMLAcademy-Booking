@@ -20,6 +20,8 @@ var PIN_MAIN_MARKER_TRANSLATE_Y = -6; // transform у псевдоэлемент
 var pinMainHeight = pinMain.offsetHeight + parseInt(getComputedStyle(pinMain, '::after').height, 10) + PIN_MAIN_MARKER_TRANSLATE_Y;
 var pinMainLocationX;
 var pinMainLocationY;
+var pinMainDefaultX = pinMain.style.left;
+var pinMainDefaultY = pinMain.style.top;
 var wasPinMoved = false;
 // шаблон .map__pin
 var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
@@ -79,15 +81,23 @@ function getPinsFragment() {
   return fragment;
 }
 
+// Возвращает метку на начальные координаты
+function setPinMainDefaultPosition() {
+  pinMain.style.left = pinMainDefaultX;
+  pinMain.style.top = pinMainDefaultY;
+}
+
 // записывает координаты главной метки в input с адресом
 function writePinMainLocationToInput() {
   // вычислеие координат главной метки
   if (isFormActive) {
     pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
     pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight + pinMainHeight);
+  } else {
+    setPinMainDefaultPosition();
+    pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
+    pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight / 2);
   }
-  pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
-  pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight / 2);
   // запись в инпут
   adFormAddress.value = pinMainLocationX + ',' + pinMainLocationY;
 }
@@ -110,7 +120,7 @@ function switchPageToInitialState() {
 switchPageToInitialState();
 
 // переход в акивное состояние страницы
-function startPageToActiveState() {
+function switchPageToActiveState() {
   adFormHeader.disabled = false;
   for (var i = 0; i < adFormFieldsets.length; i++) {
     adFormFieldsets[i].disabled = false;
@@ -123,6 +133,7 @@ function startPageToActiveState() {
   //
   mapBlock.classList.remove('map--faded');
   adForm.classList.remove('ad-form--disabled');
+  isFormActive = true;
   // Вставка в DOM фрагмента с метками:
   document.querySelector(' .map__pins').appendChild(getPinsFragment());
   // Обработчики на поля формы:
@@ -134,7 +145,7 @@ function startPageToActiveState() {
 function startPage() {
   writePinMainLocationToInput();
   if (wasPinMoved) {
-    startPageToActiveState();
+    switchPageToActiveState();
   }
 }
 
@@ -252,7 +263,7 @@ pinMain.addEventListener('mousedown', function (mousedownEvt) {
 
   // первое перемещение метки переводит страницу в активное состояние:
   function buttonStartMoveHandler() {
-    startPageToActiveState();
+    switchPageToActiveState();
     document.removeEventListener('mousemove', buttonStartMoveHandler);
   }
 
