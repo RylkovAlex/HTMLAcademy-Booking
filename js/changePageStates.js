@@ -73,8 +73,6 @@
     //
     mapBlock.classList.remove('map--faded');
     adForm.classList.remove('ad-form--disabled');
-    // Вставка в DOM фрагмента с метками:
-    document.querySelector(' .map__pins').appendChild(window.getPinsFragment());
   }
   window.switchPageToActiveState = switchPageToActiveState;
 

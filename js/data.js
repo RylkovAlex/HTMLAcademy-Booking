@@ -58,5 +58,20 @@
     return fragment;
   }
 
-  window.getPinsFragment = getPinsFragment; // нужен будет при переводе страницы в активное состояние
+  window.PinsFragment = getPinsFragment();
+
+  function delatePins() {
+    var mapPins = document.querySelectorAll('.map__pin');
+    for (var i = 1; i < mapPins.length; i++) {
+      mapPins[i].remove();
+    }
+  }
+  // TODO: здесь исправить баг, чтоб ловить mouseup только у метки, которую двигаем, а не везде и всегда по документу.
+  document.addEventListener('mouseup', function () {
+    // document.querySelector(' .map__pins').appendChild(window.PinsFragment);
+    delatePins();
+    PinsMock = getPinsMock(8);
+    window.PinsFragment = getPinsFragment();
+    // document.querySelector(' .map__pins').appendChild(window.PinsFragment);
+  });
 })();

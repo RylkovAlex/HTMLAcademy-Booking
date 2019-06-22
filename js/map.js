@@ -59,6 +59,9 @@
     }
 
     function buttonMouseUpHandler() {
+      // Вставка в DOM фрагмента с метками:
+      document.querySelector(' .map__pins').appendChild(window.PinsFragment);
+      // удаление обработчиков:
       document.removeEventListener('mousemove', buttonMoveHandler);
       document.removeEventListener('mouseup', buttonMouseUpHandler);
       document.removeEventListener('mousemove', buttonStartMoveHandler);
@@ -69,9 +72,5 @@
     document.addEventListener('mouseup', buttonMouseUpHandler);
 
   });
-
-  pinMain.ondragstart = function () {
-    return false;
-  };
 
 })();
