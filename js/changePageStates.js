@@ -30,7 +30,7 @@
     // вычислеие координат главной метки
     if (window.wasPinMoved) {
       pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
-      pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight + pinMainHeight);
+      pinMainLocationY = Math.floor(pinMain.offsetTop + pinMainHeight);
     } else {
       setPinMainDefaultPosition();
       pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
