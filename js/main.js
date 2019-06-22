@@ -278,10 +278,3 @@ pinMain.addEventListener('mousedown', function (mousedownEvt) {
   document.addEventListener('mouseup', buttonMouseUpHandler);
 
 });
-
-pinMain.ondragstart = function () {
-  return false;
-};
-
-
-// pinMain.addEventListener('click', swithPageToActiveState);
