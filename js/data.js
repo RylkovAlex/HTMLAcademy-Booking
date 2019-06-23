@@ -6,6 +6,8 @@
   var MAP_PIN_WIDTH = 50;
   var MAP_PIN_HEIGHT = 70;
   var mapBlock = document.querySelector('.map');
+  var pinMain = mapBlock.querySelector('.map__pin--main');
+
   // шаблон .map__pin
   var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 
@@ -36,9 +38,6 @@
     return mockArr;
   }
 
-  // создаём массив входных данных(Моки)
-  var PinsMock = getPinsMock(8);
-
   // создаёт DOM-элемент map__pin из шаблона
   function renderPin(pin) {
     var pinElement = mapPinTemplate.cloneNode(true);
@@ -48,7 +47,7 @@
 
     return pinElement;
   }
-
+  var PinsMock;
   // Создаёт фрагмента с элементами
   function getPinsFragment() {
     var fragment = document.createDocumentFragment();
@@ -58,20 +57,43 @@
     return fragment;
   }
 
-  window.PinsFragment = getPinsFragment();
-
-  function delatePins() {
+  // var pinsFragment = getPinsFragment();
+  // удаление меток с карты
+  function deletePins() {
     var mapPins = document.querySelectorAll('.map__pin');
     for (var i = 1; i < mapPins.length; i++) {
       mapPins[i].remove();
     }
   }
-  // TODO: здесь исправить баг, чтоб ловить mouseup только у метки, которую двигаем, а не везде и всегда по документу.
-  document.addEventListener('mouseup', function () {
-    // document.querySelector(' .map__pins').appendChild(window.PinsFragment);
-    delatePins();
+
+  // обработчик создаст и вставит новый фрагмент на карту при перемещении метки
+  function pinMainMousedownHandler() {
+    var wasPinMoved = false;
+    // создаём массив входных данных(Моки)
     PinsMock = getPinsMock(8);
-    window.PinsFragment = getPinsFragment();
-    // document.querySelector(' .map__pins').appendChild(window.PinsFragment);
-  });
+    // делаем из них фрагмент для вставки в DOM
+    var pinsFragment = getPinsFragment();
+    // добавляем обработчик движения
+    document.addEventListener('mousemove', pinMainMousemoveHandler);
+    document.addEventListener('mouseup', pinMainMouseupHandler);
+
+    function pinMainMousemoveHandler() {
+      // если движение произошло, то удаляем всё с карты:
+      deletePins();
+      wasPinMoved = true;
+      document.removeEventListener('mousemove', pinMainMousemoveHandler);
+    }
+
+    function pinMainMouseupHandler() {
+      // движение закончилось: вставляем новые метки на карту
+      if (wasPinMoved) {
+        document.querySelector(' .map__pins').appendChild(pinsFragment);
+      }
+      document.removeEventListener('mouseup', pinMainMouseupHandler);
+      document.removeEventListener('mousemove', pinMainMousemoveHandler);
+    }
+  }
+
+  pinMain.addEventListener('mousedown', pinMainMousedownHandler);
+
 })();

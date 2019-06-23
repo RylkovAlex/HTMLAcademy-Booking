@@ -19,7 +19,7 @@
   var pinMainLocationY;
   var pinMainDefaultX = pinMain.style.left;
   var pinMainDefaultY = pinMain.style.top;
-  window.wasPinMoved = false;
+  window.isPageActive = false;
   // Возвращает метку на начальные координаты
   function setPinMainDefaultPosition() {
     pinMain.style.left = pinMainDefaultX;
@@ -28,7 +28,7 @@
   // записывает координаты главной метки в input с адресом
   function writePinMainLocationToInput() {
     // вычислеие координат главной метки
-    if (window.wasPinMoved) {
+    if (window.isPageActive) {
       pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
       pinMainLocationY = Math.floor(pinMain.offsetTop + pinMainHeight);
     } else {
@@ -44,6 +44,7 @@
 
   // переход в исходное (неактивное состояние страницы)
   function switchPageToInitialState() {
+    window.isPageActive = false;
     adFormHeader.disabled = true;
     for (var i = 0; i < adFormFieldsets.length; i++) {
       adFormFieldsets[i].disabled = true;
@@ -61,6 +62,7 @@
 
   // переход в акивное состояние страницы
   function switchPageToActiveState() {
+    window.isPageActive = true;
     adFormHeader.disabled = false;
     for (var i = 0; i < adFormFieldsets.length; i++) {
       adFormFieldsets[i].disabled = false;
@@ -76,12 +78,5 @@
   }
   window.switchPageToActiveState = switchPageToActiveState;
 
-  function startPage() {
-    writePinMainLocationToInput();
-    if (window.wasPinMoved) {
-      switchPageToActiveState();
-    }
-  }
-
-  startPage();
+  writePinMainLocationToInput();
 })();

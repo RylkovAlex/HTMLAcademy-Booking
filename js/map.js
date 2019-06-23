@@ -7,49 +7,60 @@
   var pinMain = mapBlock.querySelector('.map__pin--main');
   var PIN_MAIN_MARKER_TRANSLATE_Y = -6; // transform у псевдоэлемента, для вычисления точных размеров метки
   var pinMainHeight = pinMain.offsetHeight + parseInt(getComputedStyle(pinMain, '::after').height, 10) + PIN_MAIN_MARKER_TRANSLATE_Y; // 81px
-  var pinMainMoveContainer = document.querySelector('.map__pins');
-  var pinMainMoveZone = window.util.getCoords(pinMainMoveContainer);
 
   pinMain.addEventListener('mousedown', function (mousedownEvt) {
+    // рассчёт координат контейнера, внутри которого планируется перемещение:
+    var pinMainMoveContainer = document.querySelector('.map__pins');
+    var pinMainMoveZone = window.util.getCoords(pinMainMoveContainer);
     // текущие координаты метки:
     var pinMainCoords = window.util.getCoords(pinMain);
-    // текущие координаты курсора
-    var Coords = {
+    // начальные координаты курсора
+    /* TODO: я не пойму, как их можно привязать к функции обработки перемещения, чтобы сделать её универсальной,
+    здесь простая передача параметром не сработает */
+    var cursorCoords = {
       x: mousedownEvt.clientX,
       y: mousedownEvt.clientY
     };
     // смещение курсора относительно левого-верхнего угла элемента
     var shiftX = mousedownEvt.clientX - pinMainCoords.left;
     var shiftY = mousedownEvt.clientY - pinMainCoords.top;
+    // рассчёт границ области перемещения:
+    pinMainMoveZone.left = pinMainMoveZone.left + shiftX;
+    pinMainMoveZone.right = pinMainMoveZone.right - pinMain.offsetWidth + shiftX;
+    pinMainMoveZone.bottom = pinMainMoveZone.bottom - pinMainHeight + shiftY;
+    pinMainMoveZone.top = pinMainMoveZone.top + shiftY + TOP_BORDER;
     // подготовка к перемещению
     pinMain.style.position = 'absolute';
     pinMain.style.zIndex = 10;
-    // реализует перемещение
-    function buttonMoveHandler(moveEvt) {
-      window.wasPinMoved = true;
+    // функция для реализации перемещения:
+    function moveElement(moveEvt, element, left, right, bottom, top) {
       moveEvt.preventDefault();
-      // расчёт смещения
+      // расчёт смещения курсора
       var shift = {
-        x: Coords.x - moveEvt.clientX,
-        y: Coords.y - moveEvt.clientY
+        x: cursorCoords.x - moveEvt.clientX,
+        y: cursorCoords.y - moveEvt.clientY
       };
-      // границы области для перемещения
-      if ((moveEvt.clientX > pinMainMoveZone.left + shiftX) &&
-          (moveEvt.clientX < pinMainMoveZone.right - pinMain.offsetWidth + shiftX) &&
-          (moveEvt.clientY < pinMainMoveZone.bottom - pinMainHeight + shiftY) &&
-          (moveEvt.clientY > pinMainMoveZone.top + shiftY + TOP_BORDER)
+      // Если новое положение курсора попадает в границы области перемещения, то перемещаем метку:
+      if ((moveEvt.clientX > left) &&
+          (moveEvt.clientX < right) &&
+          (moveEvt.clientY < bottom) &&
+          (moveEvt.clientY > top)
       ) {
-        // перезапись координат курсора
-        Coords = {
+        // перемещение элемента на вычисленное смещение курсора
+        element.style.top = (element.offsetTop - shift.y) + 'px';
+        element.style.left = (element.offsetLeft - shift.x) + 'px';
+        // перезапись стартовых координат курсора на новые, текущие
+        cursorCoords = {
           x: moveEvt.clientX,
           y: moveEvt.clientY
         };
-        // перемещение элемента на вычисленное смещение
-        pinMain.style.top = (pinMain.offsetTop - shift.y) + 'px';
-        pinMain.style.left = (pinMain.offsetLeft - shift.x) + 'px';
-        // запись координат метки в инпут
-        window.writePinMainLocationToInput();
       }
+    }
+
+    // обработчик mousemove:
+    function buttonMoveHandler(moveEvt) {
+      moveElement(moveEvt, pinMain, pinMainMoveZone.left, pinMainMoveZone.right, pinMainMoveZone.bottom, pinMainMoveZone.top);
+      window.writePinMainLocationToInput();
     }
 
     // первое перемещение метки переводит страницу в активное состояние:
@@ -59,9 +70,7 @@
     }
 
     function buttonMouseUpHandler() {
-      // Вставка в DOM фрагмента с метками:
-      document.querySelector(' .map__pins').appendChild(window.PinsFragment);
-      // удаление обработчиков:
+      // удаление обработчиков
       document.removeEventListener('mousemove', buttonMoveHandler);
       document.removeEventListener('mouseup', buttonMouseUpHandler);
       document.removeEventListener('mousemove', buttonStartMoveHandler);
