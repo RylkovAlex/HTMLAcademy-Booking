@@ -11,6 +11,8 @@
   // шаблон .map__pin
   var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 
+  pinMain.addEventListener('mousedown', pinMainMousedownHandler);
+
   // создаёт объект с данными для элемента map__pin
   function getPin(n) {
     var offerTypes = ['palace', 'flat', 'house', 'bungalo'];
@@ -93,7 +95,5 @@
       document.removeEventListener('mousemove', pinMainMousemoveHandler);
     }
   }
-
-  pinMain.addEventListener('mousedown', pinMainMousedownHandler);
 
 })();

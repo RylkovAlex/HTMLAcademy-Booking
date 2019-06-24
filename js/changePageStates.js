@@ -20,11 +20,41 @@
   var pinMainDefaultX = pinMain.style.left;
   var pinMainDefaultY = pinMain.style.top;
   window.isPageActive = false;
+
+  // запись координат в инпут ещё до перевода страницы в активное состояние:
+  writePinMainLocationToInput();
+
+  pinMain.addEventListener('mousedown', function () {
+    document.addEventListener('mousemove', buttonMoveHandler);
+
+    // первое перемещение метки переводит страницу в активное состояние:
+    document.addEventListener('mousemove', buttonStartMoveHandler);
+
+    document.addEventListener('mouseup', function buttonMouseUpHandler() {
+      document.removeEventListener('mousemove', buttonStartMoveHandler);
+      document.removeEventListener('mousemove', buttonMoveHandler);
+      document.removeEventListener('mouseup', buttonMouseUpHandler);
+    });
+
+    function buttonMoveHandler() {
+      writePinMainLocationToInput();
+    }
+
+    // первое перемещение метки:
+    function buttonStartMoveHandler() {
+      window.switchPageToActiveState();
+      document.removeEventListener('mousemove', buttonStartMoveHandler);
+    }
+  });
+
+  // Далее вспомогательные функции:
+
   // Возвращает метку на начальные координаты
   function setPinMainDefaultPosition() {
     pinMain.style.left = pinMainDefaultX;
     pinMain.style.top = pinMainDefaultY;
   }
+
   // записывает координаты главной метки в input с адресом
   function writePinMainLocationToInput() {
     // вычислеие координат главной метки
@@ -39,8 +69,6 @@
     // запись в инпут
     adFormAddress.value = pinMainLocationX + ',' + pinMainLocationY;
   }
-
-  window.writePinMainLocationToInput = writePinMainLocationToInput;
 
   // переход в исходное (неактивное состояние страницы)
   function switchPageToInitialState() {
@@ -78,5 +106,4 @@
   }
   window.switchPageToActiveState = switchPageToActiveState;
 
-  writePinMainLocationToInput();
 })();
