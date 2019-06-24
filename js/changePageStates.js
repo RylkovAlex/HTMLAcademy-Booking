@@ -4,7 +4,7 @@
   // основная форма для создания объявления
   var adForm = document.querySelector('.ad-form');
   var adFormHeader = adForm.querySelector('.ad-form-header');
-  var adFormFieldsets = adForm.querySelectorAll('.ad-form__pinMain');
+  var adFormFieldsets = adForm.querySelectorAll('.ad-form__element');
   var adFormAddress = adForm.querySelector('#address');
   // форма с фильтрами
   var filtersForm = document.querySelector('.map__filters');
@@ -20,6 +20,8 @@
   var pinMainDefaultX = pinMain.style.left;
   var pinMainDefaultY = pinMain.style.top;
   window.isPageActive = false;
+
+  switchPageToInitialState();
 
   // запись координат в инпут ещё до перевода страницы в активное состояние:
   writePinMainLocationToInput();
