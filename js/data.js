@@ -7,6 +7,8 @@
   var MAP_PIN_HEIGHT = 70;
   var mapBlock = document.querySelector('.map');
   var pinMain = mapBlock.querySelector('.map__pin--main');
+  var PinsMock;
+  var pinsFragment;
 
   // шаблон .map__pin
   var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
@@ -36,7 +38,6 @@
     for (var i = 1; i <= n; i++) {
       mockArr.push(getPin(i));
     }
-
     return mockArr;
   }
 
@@ -46,10 +47,9 @@
     pinElement.style = 'left: ' + (pin.location.x - Math.floor(MAP_PIN_WIDTH / 2)) + 'px; top: ' + (pin.location.y - MAP_PIN_HEIGHT) + 'px;';
     pinElement.firstElementChild.src = pin.author.avatar;
     pinElement.firstElementChild.alt = pin.offer.type;
-
     return pinElement;
   }
-  var PinsMock;
+
   // Создаёт фрагмента с элементами
   function getPinsFragment() {
     var fragment = document.createDocumentFragment();
@@ -59,7 +59,6 @@
     return fragment;
   }
 
-  // var pinsFragment = getPinsFragment();
   // удаление меток с карты
   function deletePins() {
     var mapPins = document.querySelectorAll('.map__pin');
@@ -74,7 +73,7 @@
     // создаём массив входных данных(Моки)
     PinsMock = getPinsMock(8);
     // делаем из них фрагмент для вставки в DOM
-    var pinsFragment = getPinsFragment();
+    pinsFragment = getPinsFragment();
     // добавляем обработчик движения
     document.addEventListener('mousemove', pinMainMousemoveHandler);
     document.addEventListener('mouseup', pinMainMouseupHandler);
