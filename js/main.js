@@ -2,19 +2,27 @@
 // основная форма для создания объявления
 var adForm = document.querySelector('.ad-form');
 var adFormHeader = adForm.querySelector('.ad-form-header');
-var adFormFieldsets = adForm.querySelectorAll('.ad-form__element');
+var adFormFieldsets = adForm.querySelectorAll('.ad-form__pinMain');
 var adFormAddress = adForm.querySelector('#address');
+var isFormActive = false;
 // форма с фильтрами
 var filtersForm = document.querySelector('.map__filters');
 var filters = filtersForm.querySelectorAll('.map__filter');
 var features = filtersForm.querySelector('.map__features');
 // Карта и параметры меток
+var TOP_BORDER = 130;
+var LOWER_BORDER = 630;
 var MAP_PIN_WIDTH = 50;
 var MAP_PIN_HEIGHT = 70;
 var mapBlock = document.querySelector('.map');
 var pinMain = mapBlock.querySelector('.map__pin--main');
+var PIN_MAIN_MARKER_TRANSLATE_Y = -6; // transform у псевдоэлемента, для вычисления точных размеров метки
+var pinMainHeight = pinMain.offsetHeight + parseInt(getComputedStyle(pinMain, '::after').height, 10) + PIN_MAIN_MARKER_TRANSLATE_Y;
 var pinMainLocationX;
 var pinMainLocationY;
+var pinMainDefaultX = pinMain.style.left;
+var pinMainDefaultY = pinMain.style.top;
+var wasPinMoved = false;
 // шаблон .map__pin
 var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 
@@ -35,7 +43,7 @@ function getPin(n) {
   };
   pin.location = {
     x: getRandomInt(MAP_PIN_WIDTH, mapBlock.offsetWidth - MAP_PIN_WIDTH),
-    y: getRandomInt(130 + MAP_PIN_HEIGHT, 630)
+    y: getRandomInt(TOP_BORDER + MAP_PIN_HEIGHT, LOWER_BORDER)
   };
   return pin;
 }
@@ -73,8 +81,24 @@ function getPinsFragment() {
   return fragment;
 }
 
+// Возвращает метку на начальные координаты
+function setPinMainDefaultPosition() {
+  pinMain.style.left = pinMainDefaultX;
+  pinMain.style.top = pinMainDefaultY;
+}
+
 // записывает координаты главной метки в input с адресом
-function writePinMainLocation() {
+function writePinMainLocationToInput() {
+  // вычислеие координат главной метки
+  if (isFormActive) {
+    pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
+    pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight + pinMainHeight);
+  } else {
+    setPinMainDefaultPosition();
+    pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
+    pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight / 2);
+  }
+  // запись в инпут
   adFormAddress.value = pinMainLocationX + ',' + pinMainLocationY;
 }
 
@@ -92,15 +116,11 @@ function switchPageToInitialState() {
   //
   mapBlock.classList.add('map--faded');
   adForm.classList.add('ad-form--disabled');
-  // вычислеие координат главной метки
-  pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
-  pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight / 2);
-  // запись координат метки в input
-  writePinMainLocation();
 }
+switchPageToInitialState();
 
 // переход в акивное состояние страницы
-function swithPageToActiveState() {
+function switchPageToActiveState() {
   adFormHeader.disabled = false;
   for (var i = 0; i < adFormFieldsets.length; i++) {
     adFormFieldsets[i].disabled = false;
@@ -113,15 +133,23 @@ function swithPageToActiveState() {
   //
   mapBlock.classList.remove('map--faded');
   adForm.classList.remove('ad-form--disabled');
-  // вычислеие координат главной метки
-  pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
-  // TODO: я не учитывал свойство transform для псевдоэлемента, если его учесть, то нужно ещё на 6px уменьшить координату по Y:
-  pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight + parseInt(getComputedStyle(pinMain, '::after').height, 10));
-  // запись координат метки в input
-  writePinMainLocation();
+  isFormActive = true;
   // Вставка в DOM фрагмента с метками:
   document.querySelector(' .map__pins').appendChild(getPinsFragment());
+  // Обработчики на поля формы:
+  houseTypeInput.addEventListener('change', checkPriceInput);
+  timeIn.addEventListener('change', setTimeOutAsTimeIn);
+  timeOut.addEventListener('change', setTimeInAsTimeOut);
 }
+
+function startPage() {
+  writePinMainLocationToInput();
+  if (wasPinMoved) {
+    switchPageToActiveState();
+  }
+}
+
+startPage();
 
 // ВАЛИДАЦИЯ полей формы
 var houseTypeInput = adForm.querySelector('#type');
@@ -161,7 +189,6 @@ function checkPriceInput() {
 }
 
 // синхронизирует время заезда и выезда
-// TODO: может стоит в одну функцию следующие две объеденить
 function setTimeOutAsTimeIn() {
   for (var i = 0; i < timeInOptions.length; i++) {
     if (timeInOptions[i].selected) {
@@ -178,9 +205,76 @@ function setTimeInAsTimeOut() {
   }
 }
 
-// Запускаем обработчики
-switchPageToInitialState();
-pinMain.addEventListener('click', swithPageToActiveState);
-houseTypeInput.addEventListener('change', checkPriceInput);
-timeIn.addEventListener('change', setTimeOutAsTimeIn);
-timeOut.addEventListener('change', setTimeInAsTimeOut);
+// вычисляет координаты элемента относительно страницы
+function getCoords(elem) {
+  var box = elem.getBoundingClientRect();
+  return {
+    top: box.top + pageYOffset,
+    left: box.left + pageXOffset,
+    right: box.left + pageXOffset + elem.offsetWidth,
+    bottom: box.top + pageYOffset + elem.offsetHeight
+  };
+}
+
+var pinMainMoveContainer = document.querySelector('.map__pins');
+var pinMainMoveZone = getCoords(pinMainMoveContainer);
+
+pinMain.addEventListener('mousedown', function (mousedownEvt) {
+  // текущие координаты метки:
+  var pinMainCoords = getCoords(pinMain);
+  // текущие координаты курсора
+  var Coords = {
+    x: mousedownEvt.clientX,
+    y: mousedownEvt.clientY
+  };
+  // смещение курсора относительно левого-верхнего угла элемента
+  var shiftX = mousedownEvt.clientX - pinMainCoords.left;
+  var shiftY = mousedownEvt.clientY - pinMainCoords.top;
+  // подготовка к перемещению
+  pinMain.style.position = 'absolute';
+  pinMain.style.zIndex = 10;
+  // реализует перемещение
+  function buttonMoveHandler(moveEvt) {
+    wasPinMoved = true;
+    moveEvt.preventDefault();
+    // расчёт смещения
+    var shift = {
+      x: Coords.x - moveEvt.clientX,
+      y: Coords.y - moveEvt.clientY
+    };
+    // границы области для перемещения
+    if ((moveEvt.clientX > pinMainMoveZone.left + shiftX) &&
+        (moveEvt.clientX < pinMainMoveZone.right - pinMain.offsetWidth + shiftX) &&
+        (moveEvt.clientY < pinMainMoveZone.bottom - pinMainHeight + shiftY) &&
+        (moveEvt.clientY > pinMainMoveZone.top + shiftY + TOP_BORDER)
+    ) {
+      // перезапись координат курсора
+      Coords = {
+        x: moveEvt.clientX,
+        y: moveEvt.clientY
+      };
+      // перемещение элемента на вычисленное смещение
+      pinMain.style.top = (pinMain.offsetTop - shift.y) + 'px';
+      pinMain.style.left = (pinMain.offsetLeft - shift.x) + 'px';
+      // запись координат метки в инпут
+      writePinMainLocationToInput();
+    }
+  }
+
+  // первое перемещение метки переводит страницу в активное состояние:
+  function buttonStartMoveHandler() {
+    switchPageToActiveState();
+    document.removeEventListener('mousemove', buttonStartMoveHandler);
+  }
+
+  function buttonMouseUpHandler() {
+    document.removeEventListener('mousemove', buttonMoveHandler);
+    document.removeEventListener('mouseup', buttonMouseUpHandler);
+    document.removeEventListener('mousemove', buttonStartMoveHandler);
+  }
+
+  document.addEventListener('mousemove', buttonMoveHandler);
+  document.addEventListener('mousemove', buttonStartMoveHandler);
+  document.addEventListener('mouseup', buttonMouseUpHandler);
+
+});
