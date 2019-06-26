@@ -1,44 +1,42 @@
 'use strict';
 (function () {
-  // Карта и параметры меток
-  var TOP_BORDER = 130;
-  var LOWER_BORDER = 630;
   var MAP_PIN_WIDTH = 50;
   var MAP_PIN_HEIGHT = 70;
   var mapBlock = document.querySelector('.map');
   var pinMain = mapBlock.querySelector('.map__pin--main');
-  var PinsMock;
-  var pinsFragment;
 
   // шаблон .map__pin
   var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 
   pinMain.addEventListener('mousedown', pinMainMousedownHandler);
 
-  // создаёт объект с данными для элемента map__pin
-  function getPin(n) {
-    var offerTypes = ['palace', 'flat', 'house', 'bungalo'];
-    var pin = {};
-    pin.author = {
-      avatar: 'img/avatars/user0' + n + '.png'
-    };
-    pin.offer = {
-      type: offerTypes[window.util.getRandomInt(0, offerTypes.length)]
-    };
-    pin.location = {
-      x: window.util.getRandomInt(MAP_PIN_WIDTH, mapBlock.offsetWidth - MAP_PIN_WIDTH),
-      y: window.util.getRandomInt(TOP_BORDER + MAP_PIN_HEIGHT, LOWER_BORDER)
-    };
-    return pin;
-  }
+  // ----------------------------------
 
-  // создаёт моки
-  function getPinsMock(n) {
-    var mockArr = [];
-    for (var i = 1; i <= n; i++) {
-      mockArr.push(getPin(i));
+  // обработчик запросит с сервера данные по похожим объявлениям, создаст и вставит новый фрагмент c метками на карту, при перемещении pinMain
+  function pinMainMousedownHandler() {
+    var wasPinMoved = false;
+    // добавляем обработчик движения
+    document.addEventListener('mousemove', pinMainMousemoveHandler);
+    document.addEventListener('mouseup', pinMainMouseupHandler);
+
+    function pinMainMousemoveHandler(e) {
+      // TODO: странно, но при обычном клике всё-равно срабатывает pinMainMousemoveHandler именно поэтому мне приходится проверять e.movementX и e.movementY
+      if (e.movementX !== 0 | e.movementY !== 0) {
+        wasPinMoved = true;
+        // если движение произошло, то удаляем всё с карты:
+        deletePins();
+        document.removeEventListener('mousemove', pinMainMousemoveHandler);
+      }
     }
-    return mockArr;
+
+    function pinMainMouseupHandler() {
+      // движение закончилось: делаем запрос на сервер и вставляем новые метки на карту
+      if (wasPinMoved) {
+        window.backend.load(insertPinsFragment, createErrorMessage);
+      }
+      document.removeEventListener('mouseup', pinMainMouseupHandler);
+      document.removeEventListener('mousemove', pinMainMousemoveHandler);
+    }
   }
 
   // создаёт DOM-элемент map__pin из шаблона
@@ -50,13 +48,41 @@
     return pinElement;
   }
 
+  // создаёт сообщение об ошибке
+  function createErrorMessage(errorMessage) {
+    // шаблон сообщения об ошибке
+    var errorTemplate = document.querySelector('#error').content.querySelector('.error');
+    var errorBlock = errorTemplate.cloneNode(true);
+    var tryagainButton = errorBlock.querySelector('.error__button');
+    errorBlock.style.zIndex = 3;
+    errorBlock.querySelector('.error__message').textContent = errorMessage;
+    // вставка сообщения в DOM:
+    document.body.insertAdjacentElement('afterBegin', errorBlock);
+    tryagainButton.addEventListener('click', function (e) {
+      e.preventDefault();
+      errorBlock.remove();
+    });
+    document.addEventListener('click', function documentClickHandler() {
+      errorBlock.remove();
+      document.removeEventListener('click', documentClickHandler);
+    });
+    document.addEventListener('keydown', function documentKeydownHandler(evt) {
+      window.util.isEscEvent(evt, function () {
+        errorBlock.remove();
+        document.removeEventListener('keydown', documentKeydownHandler);
+      });
+    });
+  }
+
+  window.createErrorMessage = createErrorMessage;
+
   // Создаёт фрагмента с элементами
-  function getPinsFragment() {
+  function insertPinsFragment(data) {
     var fragment = document.createDocumentFragment();
-    for (var i = 0; i < PinsMock.length; i++) {
-      fragment.appendChild(renderPin(PinsMock[i]));
+    for (var i = 0; i < data.length; i++) {
+      fragment.appendChild(renderPin(data[i]));
     }
-    return fragment;
+    document.querySelector(' .map__pins').appendChild(fragment);
   }
 
   // удаление меток с карты
@@ -67,32 +93,6 @@
     }
   }
 
-  // обработчик создаст и вставит новый фрагмент на карту при перемещении метки
-  function pinMainMousedownHandler() {
-    var wasPinMoved = false;
-    // создаём массив входных данных(Моки)
-    PinsMock = getPinsMock(8);
-    // делаем из них фрагмент для вставки в DOM
-    pinsFragment = getPinsFragment();
-    // добавляем обработчик движения
-    document.addEventListener('mousemove', pinMainMousemoveHandler);
-    document.addEventListener('mouseup', pinMainMouseupHandler);
-
-    function pinMainMousemoveHandler() {
-      // если движение произошло, то удаляем всё с карты:
-      deletePins();
-      wasPinMoved = true;
-      document.removeEventListener('mousemove', pinMainMousemoveHandler);
-    }
-
-    function pinMainMouseupHandler() {
-      // движение закончилось: вставляем новые метки на карту
-      if (wasPinMoved) {
-        document.querySelector(' .map__pins').appendChild(pinsFragment);
-      }
-      document.removeEventListener('mouseup', pinMainMouseupHandler);
-      document.removeEventListener('mousemove', pinMainMousemoveHandler);
-    }
-  }
+  window.deletePins = deletePins;
 
 })();

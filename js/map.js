@@ -26,7 +26,7 @@
   function pinMainMousedownHandler(mousedownEvt) {
     // подготовка к перемещению:
     pinMain.style.position = 'absolute';
-    pinMain.style.zIndex = 10;
+    pinMain.style.zIndex = 2;
     // запомнили положение курсора
     startCoords.x = mousedownEvt.clientX;
     startCoords.y = mousedownEvt.clientY;
