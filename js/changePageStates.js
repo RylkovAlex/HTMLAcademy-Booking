@@ -6,6 +6,7 @@
   var adFormHeader = adForm.querySelector('.ad-form-header');
   var adFormFieldsets = adForm.querySelectorAll('.ad-form__element');
   var adFormAddress = adForm.querySelector('#address');
+  var adFormReset = adForm.querySelector('.ad-form__reset');
   // форма с фильтрами
   var filtersForm = document.querySelector('.map__filters');
   var filters = filtersForm.querySelectorAll('.map__filter');
@@ -23,33 +24,34 @@
 
   switchPageToInitialState();
 
-  // запись координат в инпут ещё до перевода страницы в активное состояние:
-  writePinMainLocationToInput();
+  adFormReset.addEventListener('click', function () {
+    setTimeout(function () {
+      switchPageToInitialState();
+    }, 100);
+  });
 
-  pinMain.addEventListener('mousedown', function () {
-    document.addEventListener('mousemove', buttonMoveHandler);
+  pinMain.addEventListener('mousedown', pinMainMousedownHandler);
 
+  // ------------------
+
+  function pinMainMousedownHandler() {
+    document.addEventListener('mousemove', writePinMainLocationToInput);
     // первое перемещение метки переводит страницу в активное состояние:
     document.addEventListener('mousemove', buttonStartMoveHandler);
-
     document.addEventListener('mouseup', function buttonMouseUpHandler() {
       document.removeEventListener('mousemove', buttonStartMoveHandler);
-      document.removeEventListener('mousemove', buttonMoveHandler);
+      document.removeEventListener('mousemove', writePinMainLocationToInput);
       document.removeEventListener('mouseup', buttonMouseUpHandler);
     });
 
-    function buttonMoveHandler() {
-      writePinMainLocationToInput();
-    }
-
     // первое перемещение метки:
-    function buttonStartMoveHandler() {
-      window.switchPageToActiveState();
-      document.removeEventListener('mousemove', buttonStartMoveHandler);
+    function buttonStartMoveHandler(e) {
+      if (e.movementX !== 0 | e.movementY !== 0) {
+        window.switchPageToActiveState();
+        document.removeEventListener('mousemove', buttonStartMoveHandler);
+      }
     }
-  });
-
-  // Далее вспомогательные функции:
+  }
 
   // Возвращает метку на начальные координаты
   function setPinMainDefaultPosition() {
@@ -64,7 +66,6 @@
       pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
       pinMainLocationY = Math.floor(pinMain.offsetTop + pinMainHeight);
     } else {
-      setPinMainDefaultPosition();
       pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
       pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight / 2);
     }
@@ -75,6 +76,9 @@
   // переход в исходное (неактивное состояние страницы)
   function switchPageToInitialState() {
     window.isPageActive = false;
+    setPinMainDefaultPosition();
+    window.deletePins();
+    writePinMainLocationToInput();
     adFormHeader.disabled = true;
     for (var i = 0; i < adFormFieldsets.length; i++) {
       adFormFieldsets[i].disabled = true;
@@ -105,6 +109,7 @@
     //
     mapBlock.classList.remove('map--faded');
     adForm.classList.remove('ad-form--disabled');
+    window.checkGuestsNumber();
   }
   window.switchPageToActiveState = switchPageToActiveState;
 
