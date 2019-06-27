@@ -11,7 +11,6 @@
   var timeInOptions = timeIn.querySelectorAll('option');
   var timeOutOptions = timeOut.querySelectorAll('option');
   var roomsInput = adForm.querySelector('#room_number');
-  var roomsOptions = roomsInput.querySelectorAll('option');
   var guestsInput = adForm.querySelector('#capacity');
   var guestsOptions = guestsInput.querySelectorAll('option');
   var submitButton = adForm.querySelector('.ad-form__submit');
@@ -31,7 +30,7 @@
       successMessage.remove();
       submitButton.disabled = false;
       window.switchPageToInitialState();
-    }, 700);
+    }, 1000);
   }
 
   // Обработчики на поля формы:
@@ -84,34 +83,33 @@
       }
     }
   }
-  // TODO: здесь пока говнокод, надо ещё подумать...
+  // проверяет значение guestsInput в зависимости от roomsInput
+  // TODO: коряво, но пока не знаю, как сделать лучше:
   function checkGuestsNumber() {
-    for (i = 0; i < guestsOptions.length; i++) {
+    var guestsToRoom = {
+      1: [1],
+      2: [1, 2],
+      3: [1, 2, 3],
+      100: [0]
+    };
+    // выключаю все варианты выбора в guestsInput
+    for (var i = 0; i < guestsOptions.length; i++) {
       guestsOptions[i].selected = false;
       guestsOptions[i].disabled = true;
     }
-    for (var i = 0; i < roomsOptions.length; i++) {
-      if (roomsOptions[i].selected) {
-        var roomValue = roomsOptions[i].value;
-      }
-    }
-    if (roomValue === '100') {
-      guestsOptions[guestsOptions.length - 1].disabled = false;
-      guestsOptions[guestsOptions.length - 1].selected = true;
-    } else {
-      for (i = 0; i < guestsOptions.length; i++) {
-        if (guestsOptions[i].value === roomValue) {
-          guestsOptions[i].selected = true;
-        }
-        if (guestsOptions[i].value > roomValue | guestsOptions[i].value === '0') {
-          guestsOptions[i].disabled = true;
-        } else {
-          guestsOptions[i].disabled = false;
-        }
-      }
+    // смотрю, какое кол-во комнат выбрано в roomsInput
+    var selectedRoom = roomsInput.value;
+    // разрешенные значения для guestsInput:
+    var guestAllowableValues = guestsToRoom[selectedRoom];
+    // первое из них выбираю по умолчанию
+    guestsInput.querySelector('[value=\'' + guestAllowableValues[0] + '\']').selected = true;
+    // остальные разрешаю выбрать:
+    guestAllowableValues.forEach(allowGuestOptions);
+
+    function allowGuestOptions(item) {
+      var option = guestsInput.querySelector('[value=\'' + item + '\']');
+      option.disabled = false;
     }
   }
   window.checkGuestsNumber = checkGuestsNumber;
-
-
 })();
