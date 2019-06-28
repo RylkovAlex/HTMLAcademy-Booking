@@ -56,7 +56,7 @@
     var tryagainButton = errorBlock.querySelector('.error__button');
     errorBlock.style.zIndex = 3;
     errorBlock.querySelector('.error__message').textContent = errorMessage;
-    // вставка сообщения в DOM:
+    // вставка сообщения в DOM в main:
     document.body.insertAdjacentElement('afterBegin', errorBlock);
     tryagainButton.addEventListener('click', function (e) {
       e.preventDefault();

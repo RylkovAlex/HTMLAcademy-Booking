@@ -39,34 +39,18 @@
   timeOut.addEventListener('change', setTimeInAsTimeOut);
   roomsInput.addEventListener('change', checkGuestsNumber);
 
-  var houseTypes = [
-    {
-      type: 'bungalo',
-      minPrice: '0'
-    },
-    {
-      type: 'flat',
-      minPrice: '1000'
-    },
-    {
-      type: 'house',
-      minPrice: '5000'
-    },
-    {
-      type: 'palace',
-      minPrice: '10000'
-    }
-  ];
-
-  // в зависимости от типа жилья меняет мин.цену и плейсхолдер
+  // проверяет соответсввие минимальной цены и типа жилья
   function checkPriceInput() {
-    for (var i = 0; i < houseTypes.length; i++) {
-      if (houseTypes[i].type === houseTypeInput.value) {
-        hosePriceInput.placeholder = houseTypes[i].minPrice;
-        hosePriceInput.min = houseTypes[i].minPrice;
-      }
-    }
+    var minpriceToHouse = {
+      'bungalo': '0',
+      'flat': '1000',
+      'house': '5000',
+      'palace': '10000'
+    };
+    hosePriceInput.placeholder = minpriceToHouse[houseTypeInput.value];
+    hosePriceInput.min = minpriceToHouse[houseTypeInput.value];
   }
+
   // синхронизирует время заезда и выезда
   function setTimeOutAsTimeIn() {
     for (var i = 0; i < timeInOptions.length; i++) {
@@ -83,8 +67,8 @@
       }
     }
   }
+
   // проверяет значение guestsInput в зависимости от roomsInput
-  // TODO: коряво, но пока не знаю, как сделать лучше:
   function checkGuestsNumber() {
     var guestsToRoom = {
       1: [1],
@@ -97,13 +81,11 @@
       guestsOptions[i].selected = false;
       guestsOptions[i].disabled = true;
     }
-    // смотрю, какое кол-во комнат выбрано в roomsInput
-    var selectedRoom = roomsInput.value;
-    // разрешенные значения для guestsInput:
-    var guestAllowableValues = guestsToRoom[selectedRoom];
+    // допустимые значения для guestsInput:
+    var guestAllowableValues = guestsToRoom[roomsInput.value];
     // первое из них выбираю по умолчанию
     guestsInput.querySelector('[value=\'' + guestAllowableValues[0] + '\']').selected = true;
-    // остальные разрешаю выбрать:
+    // и разрешаю выбрать допустимые:
     guestAllowableValues.forEach(allowGuestOptions);
 
     function allowGuestOptions(item) {
