@@ -11,7 +11,6 @@
   var timeInOptions = timeIn.querySelectorAll('option');
   var timeOutOptions = timeOut.querySelectorAll('option');
   var roomsInput = adForm.querySelector('#room_number');
-  var roomsOptions = roomsInput.querySelectorAll('option');
   var guestsInput = adForm.querySelector('#capacity');
   var guestsOptions = guestsInput.querySelectorAll('option');
   var submitButton = adForm.querySelector('.ad-form__submit');
@@ -31,7 +30,7 @@
       successMessage.remove();
       submitButton.disabled = false;
       window.switchPageToInitialState();
-    }, 700);
+    }, 1000);
   }
 
   // Обработчики на поля формы:
@@ -40,34 +39,18 @@
   timeOut.addEventListener('change', setTimeInAsTimeOut);
   roomsInput.addEventListener('change', checkGuestsNumber);
 
-  var houseTypes = [
-    {
-      type: 'bungalo',
-      minPrice: '0'
-    },
-    {
-      type: 'flat',
-      minPrice: '1000'
-    },
-    {
-      type: 'house',
-      minPrice: '5000'
-    },
-    {
-      type: 'palace',
-      minPrice: '10000'
-    }
-  ];
-
-  // в зависимости от типа жилья меняет мин.цену и плейсхолдер
+  // проверяет соответсввие минимальной цены и типа жилья
   function checkPriceInput() {
-    for (var i = 0; i < houseTypes.length; i++) {
-      if (houseTypes[i].type === houseTypeInput.value) {
-        hosePriceInput.placeholder = houseTypes[i].minPrice;
-        hosePriceInput.min = houseTypes[i].minPrice;
-      }
-    }
+    var minpriceToHouse = {
+      'bungalo': '0',
+      'flat': '1000',
+      'house': '5000',
+      'palace': '10000'
+    };
+    hosePriceInput.placeholder = minpriceToHouse[houseTypeInput.value];
+    hosePriceInput.min = minpriceToHouse[houseTypeInput.value];
   }
+
   // синхронизирует время заезда и выезда
   function setTimeOutAsTimeIn() {
     for (var i = 0; i < timeInOptions.length; i++) {
@@ -84,34 +67,31 @@
       }
     }
   }
-  // TODO: здесь пока говнокод, надо ещё подумать...
+
+  // проверяет значение guestsInput в зависимости от roomsInput
   function checkGuestsNumber() {
-    for (i = 0; i < guestsOptions.length; i++) {
+    var guestsToRoom = {
+      1: [1],
+      2: [1, 2],
+      3: [1, 2, 3],
+      100: [0]
+    };
+    // выключаю все варианты выбора в guestsInput
+    for (var i = 0; i < guestsOptions.length; i++) {
       guestsOptions[i].selected = false;
       guestsOptions[i].disabled = true;
     }
-    for (var i = 0; i < roomsOptions.length; i++) {
-      if (roomsOptions[i].selected) {
-        var roomValue = roomsOptions[i].value;
-      }
-    }
-    if (roomValue === '100') {
-      guestsOptions[guestsOptions.length - 1].disabled = false;
-      guestsOptions[guestsOptions.length - 1].selected = true;
-    } else {
-      for (i = 0; i < guestsOptions.length; i++) {
-        if (guestsOptions[i].value === roomValue) {
-          guestsOptions[i].selected = true;
-        }
-        if (guestsOptions[i].value > roomValue | guestsOptions[i].value === '0') {
-          guestsOptions[i].disabled = true;
-        } else {
-          guestsOptions[i].disabled = false;
-        }
-      }
+    // допустимые значения для guestsInput:
+    var guestAllowableValues = guestsToRoom[roomsInput.value];
+    // первое из них выбираю по умолчанию
+    guestsInput.querySelector('[value=\'' + guestAllowableValues[0] + '\']').selected = true;
+    // и разрешаю выбрать допустимые:
+    guestAllowableValues.forEach(allowGuestOptions);
+
+    function allowGuestOptions(item) {
+      var option = guestsInput.querySelector('[value=\'' + item + '\']');
+      option.disabled = false;
     }
   }
   window.checkGuestsNumber = checkGuestsNumber;
-
-
 })();
