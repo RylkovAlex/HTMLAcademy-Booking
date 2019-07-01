@@ -24,7 +24,7 @@
       if (e.movementX !== 0 | e.movementY !== 0) {
         wasPinMoved = true;
         // если движение произошло, то удаляем всё с карты:
-        deletePins();
+        // deletePins();
         document.removeEventListener('mousemove', pinMainMousemoveHandler);
       }
     }
@@ -78,6 +78,7 @@
 
   // Создаёт фрагмента с элементами
   function insertPinsFragment(data) {
+    window.pinData = data;
     var fragment = document.createDocumentFragment();
     for (var i = 0; i < data.length; i++) {
       fragment.appendChild(renderPin(data[i]));
@@ -85,10 +86,10 @@
     document.querySelector(' .map__pins').appendChild(fragment);
   }
 
-  // удаление меток с карты
-  function deletePins() {
+  // удаление меток с карты, n - кол-во меток, которое нужно оставить в DOM'е
+  function deletePins(n) {
     var mapPins = document.querySelectorAll('.map__pin');
-    for (var i = 1; i < mapPins.length; i++) {
+    for (var i = 1 + n; i < mapPins.length; i++) {
       mapPins[i].remove();
     }
   }
