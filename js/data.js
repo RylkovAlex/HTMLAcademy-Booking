@@ -79,8 +79,9 @@
   // Создаёт фрагмента с элементами
   function insertPinsFragment(data) {
     window.pinData = data;
+    var quantity = data.length > 5 ? 5 : data.length;
     var fragment = document.createDocumentFragment();
-    for (var i = 0; i < data.length; i++) {
+    for (var i = 0; i < quantity; i++) {
       fragment.appendChild(renderPin(data[i]));
     }
     document.querySelector(' .map__pins').appendChild(fragment);
