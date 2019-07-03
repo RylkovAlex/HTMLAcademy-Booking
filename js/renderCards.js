@@ -35,7 +35,6 @@
       selectedPin.classList.add('map__pin--active');
       // готовлю под него карточку
       pinCard = renderCard(cardData);
-      console.log(cardData);
       // вставляю её в DOM
       mapBlock.appendChild(pinCard);
     }
