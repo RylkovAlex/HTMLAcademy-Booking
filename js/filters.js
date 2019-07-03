@@ -34,7 +34,7 @@
       return data;
     }
     var filteredData = data.filter(function (it) {
-      return (it.offer[offerKey] === +value);
+      return (it.offer[offerKey].toString() === value.toString());
     });
     return filteredData;
   }
