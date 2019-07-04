@@ -11,6 +11,19 @@
     'palace': 'Дворец'
   };
 
+  // карточка объявления по шаблону и её элементы:
+  var card = document.querySelector('#card')
+  .content.querySelector('.map__card')
+  .cloneNode(true);
+  var avatar = card.querySelector('.popup__avatar');
+  var title = card.querySelector('.popup__title');
+  var address = card.querySelector('.popup__text--address');
+  var price = card.querySelector('.popup__text--price');
+  var type = card.querySelector('.popup__type');
+  var capacity = card.querySelector('.popup__text--capacity');
+  var checkInOut = card.querySelector('.popup__text--time');
+  var description = card.querySelector('.popup__description');
+
   mapBlock.addEventListener('click', function (evt) {
     // если уже была выбрана, то удаляю ей класс active
     if (selectedPin) {
@@ -41,17 +54,10 @@
   });
 
   function renderCard(data) {
-    var card = document.querySelector('#card')
+    // обновляю карточку, т.к. у существующего шаблона могли быть удалены некоторые элементы:
+    card = document.querySelector('#card')
       .content.querySelector('.map__card')
       .cloneNode(true);
-    var avatar = card.querySelector('.popup__avatar');
-    var title = card.querySelector('.popup__title');
-    var address = card.querySelector('.popup__text--address');
-    var price = card.querySelector('.popup__text--price');
-    var type = card.querySelector('.popup__type');
-    var capacity = card.querySelector('.popup__text--capacity');
-    var checkInOut = card.querySelector('.popup__text--time');
-    var description = card.querySelector('.popup__description');
 
     if (data.author.avatar) {
       avatar.src = data.author.avatar;

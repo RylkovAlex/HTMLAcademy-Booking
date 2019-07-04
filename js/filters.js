@@ -4,29 +4,32 @@
   var filters = filtersContainer.querySelectorAll('.map__filter');
   var quantity = 5;
 
+  var housingType = filtersContainer.querySelector('#housing-type');
+  var housingPrice = filtersContainer.querySelector('#housing-price');
+  var LOW_PRICE = 10000;
+  var HIGH_PRICE = 50000;
+  var housingRooms = filtersContainer.querySelector('#housing-rooms');
+  var housingGuests = filtersContainer.querySelector('#housing-guests');
+  var adsFilteredData;
+
   filters.forEach(function (it) {
     it.addEventListener('change', filter);
   });
 
   function filter() {
-    var housingType = filtersContainer.querySelector('#housing-type').value;
-    var housingPrice = filtersContainer.querySelector('#housing-price').value;
-    var housingRooms = filtersContainer.querySelector('#housing-rooms').value;
-    var housingGuests = filtersContainer.querySelector('#housing-guests').value;
-
-    window.adsFilteredData = filterData(window.adsDefaultData, housingType, 'type');
-    window.adsFilteredData = filterHousingPrice(window.adsFilteredData, housingPrice);
-    window.adsFilteredData = filterData(window.adsFilteredData, housingRooms, 'rooms');
-    window.adsFilteredData = filterData(window.adsFilteredData, housingGuests, 'guests');
+    adsFilteredData = filterData(window.adsDefaultData, housingType.value, 'type');
+    adsFilteredData = filterHousingPrice(adsFilteredData, housingPrice.value);
+    adsFilteredData = filterData(adsFilteredData, housingRooms.value, 'rooms');
+    adsFilteredData = filterData(adsFilteredData, housingGuests.value, 'guests');
 
     window.deletePins();
-    window.insertPinsFragment(window.adsFilteredData, quantity);
+    window.insertPinsFragment(adsFilteredData, quantity);
   }
 
   /*   function HousingTypeChangeHandler() {
-    window.adsFilteredData = filterHousingType(window.adsDefaultData);
+    adsFilteredData = filterHousingType(window.adsDefaultData);
     window.deletePins();
-    window.insertPinsFragment(window.adsFilteredData, quantity);
+    window.insertPinsFragment(adsFilteredData, quantity);
   } */
 
   function filterData(data, value, offerKey) {
@@ -42,13 +45,13 @@
   function filterHousingPrice(data, value) {
     var filterCbToValue = {
       'middle': function (it) {
-        return (it.offer.price >= 10000 && it.offer.price <= 50000);
+        return (it.offer.price >= LOW_PRICE && it.offer.price <= HIGH_PRICE);
       },
       'low': function (it) {
-        return (it.offer.price < 10000);
+        return (it.offer.price < LOW_PRICE);
       },
       'high': function (it) {
-        return (it.offer.price > 50000);
+        return (it.offer.price > HIGH_PRICE);
       }
     };
     if (value === 'any') {
