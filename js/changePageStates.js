@@ -11,6 +11,7 @@
   var filtersForm = document.querySelector('.map__filters');
   var filters = filtersForm.querySelectorAll('.map__filter');
   var features = filtersForm.querySelector('.map__features');
+  var featuresCheckboxs = features.querySelectorAll('.map__checkbox');
   // Карта и параметры меток
   var mapBlock = document.querySelector('.map');
   var pinMain = mapBlock.querySelector('.map__pin--main');
@@ -83,11 +84,15 @@
     for (var i = 0; i < adFormFieldsets.length; i++) {
       adFormFieldsets[i].disabled = true;
     }
-    //
-    features.disabled = true;
+    // все фильтры к default значениям:
     for (i = 0; i < filters.length; i++) {
+      filters[i].value = 'any';
       filters[i].disabled = true;
     }
+    for (i = 0; i < featuresCheckboxs.length; i++) {
+      featuresCheckboxs[i].checked = false;
+    }
+    features.disabled = true;
     //
     mapBlock.classList.add('map--faded');
     adForm.classList.add('ad-form--disabled');
