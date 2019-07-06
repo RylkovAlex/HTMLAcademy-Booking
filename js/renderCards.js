@@ -3,6 +3,7 @@
 (function () {
   var mapBlock = document.querySelector('.map');
   var selectedPin;
+  var lastSelectedPin;
   var pinCard;
   window.houseType = {
     'bungalo': 'Бунгало',
@@ -11,53 +12,64 @@
     'palace': 'Дворец'
   };
 
-  // карточка объявления по шаблону и её элементы:
-  var card = document.querySelector('#card')
-  .content.querySelector('.map__card')
-  .cloneNode(true);
-  var avatar = card.querySelector('.popup__avatar');
-  var title = card.querySelector('.popup__title');
-  var address = card.querySelector('.popup__text--address');
-  var price = card.querySelector('.popup__text--price');
-  var type = card.querySelector('.popup__type');
-  var capacity = card.querySelector('.popup__text--capacity');
-  var checkInOut = card.querySelector('.popup__text--time');
-  var description = card.querySelector('.popup__description');
+  // обработчик клика по карте
+  mapBlock.addEventListener('click', mapBlockClickHandler);
 
-  mapBlock.addEventListener('click', function (evt) {
-    // если уже была выбрана, то удаляю ей класс active
-    if (selectedPin) {
-      selectedPin.classList.remove('map__pin--active');
-    }
-    // если какая-то карточка открыта, то убираю её
-    if (pinCard) {
-      pinCard.remove();
-    }
-    // смотрю куда кликнули
+  function mapBlockClickHandler(evt) {
+    // смотрю куда вообще кликнули
     selectedPin = evt.target;
     if (selectedPin.tagName.toLowerCase() === 'img') {
       selectedPin = selectedPin.parentElement;
     }
     // если клик пришёлся на пин, то обрабатываю его:
     if (selectedPin.getAttribute('class') === 'map__pin') {
+      // если какая-то карточка открыта, то убираю её
+      if (pinCard) {
+        pinCard.remove();
+        lastSelectedPin.classList.remove('map__pin--active');
+      }
       // нахожу данные по выбранному объявлению
       var cardData = window.adsDefaultData.filter(function (it) {
         return (it.location.x === selectedPin.locX && it.location.y === selectedPin.locY);
       })[0];
       // добавляю класс active выбранному пину
       selectedPin.classList.add('map__pin--active');
+      lastSelectedPin = selectedPin;
       // готовлю под него карточку
       pinCard = renderCard(cardData);
       // вставляю её в DOM
       mapBlock.appendChild(pinCard);
+      // вешаю обработчики на закрытие
+      var closeButton = pinCard.querySelector('.popup__close');
+      closeButton.addEventListener('click', closeCardPopUp);
+      document.addEventListener('keydown', closeButtonEscHandler);
     }
-  });
+    function closeCardPopUp() {
+      lastSelectedPin.classList.remove('map__pin--active');
+      closeButton.removeEventListener('click', closeCardPopUp);
+      document.removeEventListener('keydown', closeButtonEscHandler);
+      pinCard.remove();
+    }
+
+    function closeButtonEscHandler(e) {
+      window.util.isEscEvent(e, closeCardPopUp);
+    }
+  }
+
 
   function renderCard(data) {
-    // обновляю карточку, т.к. у существующего шаблона могли быть удалены некоторые элементы:
-    card = document.querySelector('#card')
-      .content.querySelector('.map__card')
-      .cloneNode(true);
+    // карточка объявления по шаблону и её элементы:
+    var card = document.querySelector('#card')
+  .content.querySelector('.map__card')
+  .cloneNode(true);
+    var avatar = card.querySelector('.popup__avatar');
+    var title = card.querySelector('.popup__title');
+    var address = card.querySelector('.popup__text--address');
+    var price = card.querySelector('.popup__text--price');
+    var type = card.querySelector('.popup__type');
+    var capacity = card.querySelector('.popup__text--capacity');
+    var checkInOut = card.querySelector('.popup__text--time');
+    var description = card.querySelector('.popup__description');
 
     if (data.author.avatar) {
       avatar.src = data.author.avatar;

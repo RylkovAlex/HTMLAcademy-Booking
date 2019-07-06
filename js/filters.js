@@ -10,17 +10,30 @@
   var HIGH_PRICE = 50000;
   var housingRooms = filtersContainer.querySelector('#housing-rooms');
   var housingGuests = filtersContainer.querySelector('#housing-guests');
+
+  var featuresContainer = filtersContainer.querySelector('#housing-features');
+  var featureCheckboxs = featuresContainer.querySelectorAll('.map__checkbox');
+
   var adsFilteredData;
+
+  featureCheckboxs.forEach(function (it) {
+    it.addEventListener('change', filter);
+  });
 
   filters.forEach(function (it) {
     it.addEventListener('change', filter);
   });
 
   function filter() {
+    if (document.querySelector('.map__card')) {
+      document.querySelector('.map__card').remove();
+    }
+    // TODO: как можно оптимизировать эту цепочку фильтрации?
     adsFilteredData = filterData(window.adsDefaultData, housingType.value, 'type');
     adsFilteredData = filterHousingPrice(adsFilteredData, housingPrice.value);
     adsFilteredData = filterData(adsFilteredData, housingRooms.value, 'rooms');
     adsFilteredData = filterData(adsFilteredData, housingGuests.value, 'guests');
+    adsFilteredData = filterFeatures(adsFilteredData);
 
     window.deletePins();
     window.insertPinsFragment(adsFilteredData, quantity);
@@ -58,6 +71,23 @@
       return data;
     }
     var filteredData = data.filter(filterCbToValue[value]);
+    return filteredData;
+  }
+
+  function filterFeatures(data) {
+    var featureSelectedCheckboxs = Array.from(featureCheckboxs).filter(function (it) {
+      return it.checked;
+    });
+    var selectedValues = featureSelectedCheckboxs.map(function (it) {
+      return it.value;
+    });
+    var filteredData = data.filter(function (it) {
+      return (
+        selectedValues.every(function (feature) {
+          return (it.offer.features.indexOf(feature) >= 0);
+        })
+      );
+    });
     return filteredData;
   }
 
