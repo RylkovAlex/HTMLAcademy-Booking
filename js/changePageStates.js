@@ -11,7 +11,6 @@
   var filtersForm = document.querySelector('.map__filters');
   var filters = filtersForm.querySelectorAll('.map__filter');
   var features = filtersForm.querySelector('.map__features');
-  var featuresCheckboxs = features.querySelectorAll('.map__checkbox');
   // Карта и параметры меток
   var mapBlock = document.querySelector('.map');
   var pinMain = mapBlock.querySelector('.map__pin--main');
@@ -84,16 +83,10 @@
     for (var i = 0; i < adFormFieldsets.length; i++) {
       adFormFieldsets[i].disabled = true;
     }
-    // все фильтры к default значениям:
-    for (i = 0; i < filters.length; i++) {
-      filters[i].value = 'any';
-      filters[i].disabled = true;
-    }
-    for (i = 0; i < featuresCheckboxs.length; i++) {
-      featuresCheckboxs[i].checked = false;
-    }
+    adForm.reset();
+    filtersForm.reset();
     features.disabled = true;
-    // возвращаю в первоначальный вид ипуты с фотографиями жилья и аватаркой
+    // возвращаю в первоначальный вид поля с фотографиями жилья и аватаркой
     adForm.querySelector('.ad-form-header__preview img').src = 'img/muffin-grey.svg';
 
     var adsPhotos = adForm.querySelectorAll('.ad-form__photo');
