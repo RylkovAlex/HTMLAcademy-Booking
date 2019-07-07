@@ -4,9 +4,10 @@
   // основная форма для создания объявления
   var adForm = document.querySelector('.ad-form');
   // поля формы для загрузки файлов:
+  // аватар
   var avatar = adForm.querySelector('#avatar');
   var avatarImg = adForm.querySelector('.ad-form-header__preview img');
-  //
+  // фото объявлений
   var adsPhotos = adForm.querySelector('#images');
   adsPhotos.multiple = true;
   var adsPhotoPreview = adForm.querySelector('.ad-form__photo');
@@ -18,29 +19,41 @@
   });
 
   adsPhotos.addEventListener('change', function () {
-    for (var i = 0; i < adsPhotos.files.length; i++) {
+    renderPhotos(adsPhotos.files);
+  });
+
+  // --------- попробую реализовать Drag-and-Drop документов:
+  var dropZone = adForm.querySelector('.ad-form__drop-zone');
+
+  dropZone.addEventListener('dragover', function (evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'copy';
+  });
+  dropZone.addEventListener('drop', filesDropHandler);
+  function filesDropHandler(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    // TODO: как эти файлы передать внутрь adsPhotos, да ёщё так чтоб там сработало событие change
+    // var files = evt.dataTransfer.files;
+  }
+
+  // ---------
+
+  function renderPhotos(files) {
+    for (var i = 0; i < files.length; i++) {
+      // создаю новый узел с картинкой внутри
       var adsPhotoPreviewImg = document.createElement('img');
       adsPhotoPreviewImg.style = 'height: 70px; width: 70px';
       var newPhotoBox = adsPhotoPreview.cloneNode(true);
       newPhotoBox.classList.remove('visually-hidden');
       newPhotoBox.appendChild(adsPhotoPreviewImg);
+      // прописываю src картинке
       setDataUrlSrc(adsPhotos, i, newPhotoBox.firstChild);
+      // вставляю созданный узел в DOM
       document.querySelector('.ad-form__photo-container').appendChild(newPhotoBox);
     }
-
-    /*     var adsPhotoPreviewImg = document.createElement('img');
-    adsPhotoPreviewImg.style = 'height: 70px; width: 70px';
-    adsPhotoPreview.appendChild(adsPhotoPreviewImg);
-    setDataUrlSrc(adsPhotos, 0, adsPhotoPreviewImg);
-
-    if (adsPhotos.files.length > 1) {
-      for (var i = 1; i < adsPhotos.files.length; i++) {
-        var newPhoto = adsPhotoPreview.cloneNode(true);
-        setDataUrlSrc(adsPhotos, i, newPhoto.firstChild);
-        document.querySelector('.ad-form__photo-container').appendChild(newPhoto);
-      }
-    } */
-  });
+  }
 
   function setDataUrlSrc(fileInput, fileNumber, img) {
     var file = fileInput.files[fileNumber];
