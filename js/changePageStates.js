@@ -93,6 +93,22 @@
       featuresCheckboxs[i].checked = false;
     }
     features.disabled = true;
+    // возвращаю в первоначальный вид ипуты с фотографиями жилья и аватаркой
+    adForm.querySelector('.ad-form-header__preview img').src = 'img/muffin-grey.svg';
+
+    var adsPhotos = adForm.querySelectorAll('.ad-form__photo');
+    var adsPhotosInput = adForm.querySelector('#images');
+    adsPhotos[0].classList.remove('visually-hidden');
+    adsPhotosInput.addEventListener('change', function firstChangeHandler() {
+      adsPhotos[0].classList.add('visually-hidden');
+      adsPhotosInput.removeEventListener('change', firstChangeHandler);
+    });
+    if (adsPhotos[0].firstChild) {
+      adsPhotos[0].firstChild.remove();
+    }
+    for (i = 1; i < adsPhotos.length; i++) {
+      adsPhotos[i].remove();
+    }
     //
     mapBlock.classList.add('map--faded');
     adForm.classList.add('ad-form--disabled');
