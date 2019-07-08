@@ -14,10 +14,14 @@
   // типы файлов:
   var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
 
+  // превьюшка аватарке:
   avatar.addEventListener('change', function () {
-    setDataUrlSrc(avatar, 0, avatarImg);
+    checkPhotosFile(avatar.files[0], function () {
+      setDataUrlSrc(avatar.files[0], avatarImg);
+    });
   });
 
+  // превьюшки фотографиям жилья
   adsPhotos.addEventListener('change', function () {
     renderPhotos(adsPhotos.files);
   });
@@ -30,14 +34,14 @@
     evt.preventDefault();
     evt.dataTransfer.dropEffect = 'copy';
   });
+
   dropZone.addEventListener('drop', filesDropHandler);
   function filesDropHandler(evt) {
     evt.stopPropagation();
     evt.preventDefault();
-    // TODO: как эти файлы передать внутрь adsPhotos, да ёщё так чтоб там сработало событие change
-    // var files = evt.dataTransfer.files;
+    renderPhotos(evt.dataTransfer.files);
   }
-
+  // TODO: исправить небольшой баг: если кидать файлы через инпут, то заглушка в разметке удаляется, а если через drag & drop, то остаётся
   // ---------
 
   function renderPhotos(files) {
@@ -49,31 +53,36 @@
       newPhotoBox.classList.remove('visually-hidden');
       newPhotoBox.appendChild(adsPhotoPreviewImg);
       // прописываю src картинке
-      setDataUrlSrc(adsPhotos, i, newPhotoBox.firstChild);
+      var isError = checkPhotosFile(files[i], function () {
+        window.adFormPhotos.push(files[i]);
+        setDataUrlSrc(files[i], newPhotoBox.firstChild);
+      });
       // вставляю созданный узел в DOM
-      document.querySelector('.ad-form__photo-container').appendChild(newPhotoBox);
+      if (!isError) {
+        document.querySelector('.ad-form__photo-container').appendChild(newPhotoBox);
+      }
     }
   }
 
-  function setDataUrlSrc(fileInput, fileNumber, img) {
-    var file = fileInput.files[fileNumber];
+  function checkPhotosFile(file, action) {
     var fileName = file.name.toLowerCase();
-
     var matches = FILE_TYPES.some(function (it) {
       return fileName.endsWith(it);
     });
-
     if (matches) {
-      var reader = new FileReader();
-      reader.readAsDataURL(file);
-
-      reader.addEventListener('load', function () {
-        img.src = reader.result;
-      });
+      action();
     } else {
-      throw new Error('Неправильный тип файла! Поддерживаемые форматы: gif, jpg, jpeg, png');
+      window.createErrorMessage('Неправильный тип файла! Поддерживаемые форматы: gif, jpg, jpeg, png');
+      return true;
     }
+    return false;
   }
 
-
+  function setDataUrlSrc(file, img) {
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.addEventListener('load', function () {
+      img.src = reader.result;
+    });
+  }
 })();
