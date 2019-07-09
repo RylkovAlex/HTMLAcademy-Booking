@@ -18,7 +18,12 @@
   adForm.addEventListener('submit', function (evt) {
     evt.preventDefault();
     submitButton.disabled = true;
-    window.backend.send(new FormData(adForm), formSuccessHandler, window.createErrorMessage);
+    var formData = new FormData(adForm);
+    formData.delete('images');
+    for (var i = 0; i < window.adFormPhotos.length; i++) {
+      formData.append('images', window.adFormPhotos[i]);
+    }
+    window.backend.send(formData, formSuccessHandler, window.createErrorMessage);
   });
 
   function formSuccessHandler() {

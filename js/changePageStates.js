@@ -76,6 +76,7 @@
   // переход в исходное (неактивное состояние страницы)
   function switchPageToInitialState() {
     window.isPageActive = false;
+    window.adFormPhotos = [];
     setPinMainDefaultPosition();
     window.deletePins();
     writePinMainLocationToInput();
@@ -92,6 +93,7 @@
     var adsPhotos = adForm.querySelectorAll('.ad-form__photo');
     var adsPhotosInput = adForm.querySelector('#images');
     adsPhotos[0].classList.remove('visually-hidden');
+    // обработчик нужен, чтоб удалить пустышку при загрузке фоток в форму
     adsPhotosInput.addEventListener('change', function firstChangeHandler() {
       adsPhotos[0].classList.add('visually-hidden');
       adsPhotosInput.removeEventListener('change', firstChangeHandler);
