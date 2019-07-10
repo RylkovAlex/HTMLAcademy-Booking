@@ -31,11 +31,18 @@
       .content.querySelector('.success')
       .cloneNode(true);
     document.body.insertAdjacentElement('afterbegin', successMessage);
-    setTimeout(function () {
+    document.addEventListener('click', removeSuccessMessage);
+    document.addEventListener('keydown', successMessageEscHandler);
+    function successMessageEscHandler(e) {
+      window.util.isEscEvent(e, removeSuccessMessage);
+    }
+    function removeSuccessMessage() {
       successMessage.remove();
       submitButton.disabled = false;
       window.switchPageToInitialState();
-    }, 1000);
+      document.removeEventListener('click', removeSuccessMessage);
+      document.removeEventListener('keydown', successMessageEscHandler);
+    }
   }
 
   // Обработчики на поля формы:

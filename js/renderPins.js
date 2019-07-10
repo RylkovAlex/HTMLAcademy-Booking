@@ -62,16 +62,22 @@
       e.preventDefault();
       errorBlock.remove();
     });
-    document.addEventListener('click', function documentClickHandler() {
+
+    document.addEventListener('click', documentClickHandler);
+    document.addEventListener('keydown', documentKeydownHandler);
+
+    function documentClickHandler() {
       errorBlock.remove();
       document.removeEventListener('click', documentClickHandler);
-    });
-    document.addEventListener('keydown', function documentKeydownHandler(evt) {
+      document.removeEventListener('keydown', documentKeydownHandler);
+    }
+    function documentKeydownHandler(evt) {
       window.util.isEscEvent(evt, function () {
         errorBlock.remove();
         document.removeEventListener('keydown', documentKeydownHandler);
+        document.removeEventListener('click', documentClickHandler);
       });
-    });
+    }
   }
 
   window.createErrorMessage = createErrorMessage;

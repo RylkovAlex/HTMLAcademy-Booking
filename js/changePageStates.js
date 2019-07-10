@@ -22,6 +22,7 @@
   var pinMainDefaultY = pinMain.style.top;
   window.isPageActive = false;
 
+  // перевод страницы в начальноне состояние
   switchPageToInitialState();
 
   adFormReset.addEventListener('click', function () {
@@ -34,9 +35,9 @@
 
   // ------------------
 
+  // обработчик нужен, чтоб отследить первое перемещение метки:
   function pinMainMousedownHandler() {
     document.addEventListener('mousemove', writePinMainLocationToInput);
-    // первое перемещение метки переводит страницу в активное состояние:
     document.addEventListener('mousemove', buttonStartMoveHandler);
     document.addEventListener('mouseup', function buttonMouseUpHandler() {
       document.removeEventListener('mousemove', buttonStartMoveHandler);
@@ -44,7 +45,7 @@
       document.removeEventListener('mouseup', buttonMouseUpHandler);
     });
 
-    // первое перемещение метки:
+    // первое перемещение метки переводит страницу в активное состояние:
     function buttonStartMoveHandler(e) {
       if (e.movementX !== 0 | e.movementY !== 0) {
         window.switchPageToActiveState();
@@ -53,7 +54,7 @@
     }
   }
 
-  // Возвращает метку на начальные координаты
+  // возвращает метку на начальные координаты
   function setPinMainDefaultPosition() {
     pinMain.style.left = pinMainDefaultX;
     pinMain.style.top = pinMainDefaultY;
