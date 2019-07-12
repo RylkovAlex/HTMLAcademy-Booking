@@ -82,9 +82,11 @@
     window.deletePins();
     writePinMainLocationToInput();
     adFormHeader.disabled = true;
-    for (var i = 0; i < adFormFieldsets.length; i++) {
-      adFormFieldsets[i].disabled = true;
+    function setDisabledTrue(it) {
+      it.disabled = true;
     }
+    adFormFieldsets.forEach(setDisabledTrue);
+    filters.forEach(setDisabledTrue);
     adForm.reset();
     filtersForm.reset();
     features.disabled = true;
@@ -102,7 +104,7 @@
     if (adsPhotos[0].firstChild) {
       adsPhotos[0].firstChild.remove();
     }
-    for (i = 1; i < adsPhotos.length; i++) {
+    for (var i = 1; i < adsPhotos.length; i++) {
       adsPhotos[i].remove();
     }
     //
@@ -115,14 +117,12 @@
   function switchPageToActiveState() {
     window.isPageActive = true;
     adFormHeader.disabled = false;
-    for (var i = 0; i < adFormFieldsets.length; i++) {
-      adFormFieldsets[i].disabled = false;
+    function setDisabledFalse(it) {
+      it.disabled = false;
     }
-    //
+    adFormFieldsets.forEach(setDisabledFalse);
+    filters.forEach(setDisabledFalse);
     features.disabled = false;
-    for (i = 0; i < filters.length; i++) {
-      filters[i].disabled = false;
-    }
     //
     mapBlock.classList.remove('map--faded');
     adForm.classList.remove('ad-form--disabled');
