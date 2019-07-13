@@ -6,23 +6,25 @@ window.backend = (function () {
 
   return {
     load: function (onLoad, onError) {
-      var xhr = new XMLHttpRequest();
-      xhr.responseType = 'json';
-
+      var xhr = createJsonXhr();
       addXhrListeners(xhr, onLoad, onError);
       xhr.open('GET', GET_URL);
       xhr.send();
     },
 
     send: function (data, onLoad, onError) {
-      var xhr = new XMLHttpRequest();
-      xhr.responseType = 'json';
-
+      var xhr = createJsonXhr();
       addXhrListeners(xhr, onLoad, onError);
       xhr.open('POST', POST_URL);
       xhr.send(data);
     }
   };
+
+  function createJsonXhr() {
+    var xhr = new XMLHttpRequest();
+    xhr.responseType = 'json';
+    return xhr;
+  }
 
   function addXhrListeners(xhr, action, errorAction) {
     xhr.addEventListener('load', function () {

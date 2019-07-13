@@ -1,17 +1,19 @@
 'use strict';
 
 (function () {
+  var TOP_BORDER = 130;
+  var LOWER_BORDER = 704;
+  var PIN_MAIN_MARKER_TRANSLATE_Y = -6; // transform у псевдоэлемента, для вычисления точных размеров метки
+
   // Карта и параметры метки:
   var mapBlock = document.querySelector('.map');
   var pinMain = mapBlock.querySelector('.map__pin--main');
-  var PIN_MAIN_MARKER_TRANSLATE_Y = -6; // transform у псевдоэлемента, для вычисления точных размеров метки (TODO: понять как получать translate из CSS)
   var pinMainHeight = pinMain.offsetHeight + parseInt(getComputedStyle(pinMain, '::after').height, 10) + PIN_MAIN_MARKER_TRANSLATE_Y; // 81px
   var pinMainMoveContainer = document.querySelector('.map__pins');
 
   // границы области, внутри которой планируется перемещение:
-  var TOP_BORDER = 130;
-  var LOWER_BORDER = 704 - pinMainHeight;
-  var RIGHT_BORDER = pinMainMoveContainer.offsetWidth - pinMain.offsetWidth;
+  var lowerBorder = LOWER_BORDER - pinMainHeight;
+  var rightBorder = pinMainMoveContainer.offsetWidth - pinMain.offsetWidth;
 
   // init startCoords
   var startCoords = {
@@ -59,12 +61,12 @@
     if (offsetTop < TOP_BORDER) {
       offsetTop = TOP_BORDER;
       // если ниже, то нижнюю
-    } else if (offsetTop >= LOWER_BORDER) {
-      offsetTop = LOWER_BORDER;
+    } else if (offsetTop >= lowerBorder) {
+      offsetTop = lowerBorder;
     }
     // аналогично для оси X
-    if (offsetLeft > RIGHT_BORDER) {
-      offsetLeft = RIGHT_BORDER;
+    if (offsetLeft > rightBorder) {
+      offsetLeft = rightBorder;
     } else if (offsetLeft < 0) {
       offsetLeft = 0;
     }

@@ -56,12 +56,12 @@
     }
   }
 
-
+  // создаёт новую карточку по шаблону и заполняет её содержимое
   function renderCard(data) {
     // карточка объявления по шаблону и её элементы:
     var card = document.querySelector('#card')
-  .content.querySelector('.map__card')
-  .cloneNode(true);
+          .content.querySelector('.map__card')
+          .cloneNode(true);
     var avatar = card.querySelector('.popup__avatar');
     var title = card.querySelector('.popup__title');
     var address = card.querySelector('.popup__text--address');
@@ -70,55 +70,46 @@
     var capacity = card.querySelector('.popup__text--capacity');
     var checkInOut = card.querySelector('.popup__text--time');
     var description = card.querySelector('.popup__description');
-
-    if (data.author.avatar) {
-      avatar.src = data.author.avatar;
-    } else {
-      avatar.remove();
-    }
-
-    if (data.offer.title) {
-      title.textContent = data.offer.title;
-    } else {
-      title.remove();
-    }
-
-    if (data.offer.address) {
-      address.textContent = data.offer.address;
-    } else {
-      address.remove();
-    }
-
-    if (data.offer.price) {
-      price.textContent = data.offer.price + '₽/ночь';
-    } else {
-      price.remove();
-    }
-
-    if (data.offer.type) {
-      type.textContent = window.houseType[data.offer.type];
-    } else {
-      type.remove();
-    }
-
-    if (data.offer.rooms > 0) {
-      capacity.textContent = data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей';
-    } else {
-      capacity.remove();
-    }
-
-    if (data.offer.description) {
-      description.textContent = data.offer.description;
-    } else {
-      description.remove();
-    }
-
-    checkInOut.textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
+    // массив с данными по объектам карточки, который используется при её заполнении
+    var cardFrame = [
+      new CardElement(avatar, 'src', data.author.avatar),
+      new CardElement(title, 'textContent', data.offer.title),
+      new CardElement(address, 'textContent', data.offer.address),
+      new CardElement(price, 'textContent', data.offer.price),
+      new CardElement(type, 'textContent', data.offer.type),
+      new CardElement(capacity, 'textContent', getCapacity()),
+      new CardElement(description, 'textContent', data.offer.description),
+      new CardElement(checkInOut, 'textContent', 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout)
+    ];
+    // Сам рендеринг содержимого:
+    cardFrame.forEach(function (it) {
+      setElementContent(it['element'], it['key'], it['elementData']);
+    });
     getFeatures();
     getPhotos();
-
     return card;
-
+    // ф-ия конструктор объектов карточки
+    function CardElement(name, key, dataForRender) {
+      this.element = name;
+      this.key = key;
+      this.elementData = dataForRender;
+    }
+    // определяет содержимое для блока capacity
+    function getCapacity() {
+      if (data.offer.rooms) {
+        return (data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей');
+      }
+      return ('Комнат нет!');
+    }
+    // заполняет контентом элементы карточки
+    function setElementContent(element, key, elementData) {
+      if (elementData) {
+        element[key] = elementData;
+      } else {
+        element.remove();
+      }
+    }
+    // заполняет блок преимуществ у карточки
     function getFeatures() {
       var featuresNode = card.querySelector('.popup__features');
       var cardFeatures = [];
@@ -141,7 +132,7 @@
         featuresNode.remove();
       }
     }
-
+    // заполняет блок с фотографиями у карточки
     function getPhotos() {
       var photos = card.querySelector('.popup__photos');
       var photo = photos.querySelector('.popup__photo');

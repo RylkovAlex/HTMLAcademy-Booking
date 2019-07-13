@@ -54,7 +54,8 @@
     var errorTemplate = document.querySelector('#error').content.querySelector('.error');
     var errorBlock = errorTemplate.cloneNode(true);
     var tryagainButton = errorBlock.querySelector('.error__button');
-    errorBlock.style.zIndex = 3;
+    tryagainButton.focus();
+    errorBlock.style.zIndex = 100;
     errorBlock.querySelector('.error__message').textContent = errorMessage;
     // вставка сообщения в DOM в main:
     document.body.insertAdjacentElement('afterBegin', errorBlock);

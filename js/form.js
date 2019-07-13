@@ -14,22 +14,23 @@
   var guestsInput = adForm.querySelector('#capacity');
   var guestsOptions = guestsInput.querySelectorAll('option');
   var submitButton = adForm.querySelector('.ad-form__submit');
-
+  // обработчик отправки
   adForm.addEventListener('submit', function (evt) {
     evt.preventDefault();
     submitButton.disabled = true;
     var formData = new FormData(adForm);
     formData.delete('images');
-    for (var i = 0; i < window.adFormPhotos.length; i++) {
-      formData.append('images', window.adFormPhotos[i]);
-    }
+    window.adFormPhotos.forEach(function (it) {
+      formData.append('images', it);
+    });
     window.backend.send(formData, formSuccessHandler, window.createErrorMessage);
   });
-
+  // обработчик успеха
   function formSuccessHandler() {
     var successMessage = document.querySelector('#success')
       .content.querySelector('.success')
       .cloneNode(true);
+    successMessage.style.zIndex = 100;
     document.body.insertAdjacentElement('afterbegin', successMessage);
     document.addEventListener('click', removeSuccessMessage);
     document.addEventListener('keydown', successMessageEscHandler);
@@ -47,8 +48,12 @@
 
   // Обработчики на поля формы:
   houseTypeInput.addEventListener('change', checkPriceInput);
-  timeIn.addEventListener('change', setTimeOutAsTimeIn);
-  timeOut.addEventListener('change', setTimeInAsTimeOut);
+  timeIn.addEventListener('change', function () {
+    setOption1AsOption2(timeOutOptions, timeInOptions);
+  });
+  timeOut.addEventListener('change', function () {
+    setOption1AsOption2(timeInOptions, timeOutOptions);
+  });
   roomsInput.addEventListener('change', checkGuestsNumber);
 
   // проверяет соответсввие минимальной цены и типа жилья
@@ -63,21 +68,12 @@
     hosePriceInput.min = minpriceToHouse[houseTypeInput.value];
   }
 
-  // синхронизирует время заезда и выезда
-  function setTimeOutAsTimeIn() {
-    for (var i = 0; i < timeInOptions.length; i++) {
-      if (timeInOptions[i].selected) {
-        timeOutOptions[i].selected = true;
+  function setOption1AsOption2(options1, options2) {
+    options2.forEach(function (it, i) {
+      if (it.selected) {
+        options1[i].selected = true;
       }
-    }
-  }
-  // синхронизирует время вызда и заезда
-  function setTimeInAsTimeOut() {
-    for (var i = 0; i < timeOutOptions.length; i++) {
-      if (timeOutOptions[i].selected) {
-        timeInOptions[i].selected = true;
-      }
-    }
+    });
   }
 
   // проверяет значение guestsInput в зависимости от roomsInput
@@ -89,10 +85,10 @@
       100: [0]
     };
     // выключаю все варианты выбора в guestsInput
-    for (var i = 0; i < guestsOptions.length; i++) {
-      guestsOptions[i].selected = false;
-      guestsOptions[i].disabled = true;
-    }
+    guestsOptions.forEach(function (option) {
+      option.selected = false;
+      option.disabled = true;
+    });
     // допустимые значения для guestsInput:
     var guestAllowableValues = guestsToRoom[roomsInput.value];
     // первое из них выбираю по умолчанию

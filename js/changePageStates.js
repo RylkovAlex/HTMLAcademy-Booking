@@ -53,6 +53,16 @@
       }
     }
   }
+  // обработчик для активации страницы с клавиатуры
+  function pinMainEnterHandler(e) {
+    window.util.isEnterEvent(e, function () {
+      document.addEventListener('keyup', function documentKeyUpHandler() {
+        pinMain.blur();
+        document.removeEventListener('keyup', documentKeyUpHandler);
+        window.createErrorMessage('для загрузки похожих объявлений переместите метку!');
+      });
+    });
+  }
 
   // возвращает метку на начальные координаты
   function setPinMainDefaultPosition() {
@@ -110,6 +120,8 @@
     //
     mapBlock.classList.add('map--faded');
     adForm.classList.add('ad-form--disabled');
+    //
+    pinMain.addEventListener('keydown', pinMainEnterHandler);
   }
   window.switchPageToInitialState = switchPageToInitialState;
 
@@ -127,6 +139,8 @@
     mapBlock.classList.remove('map--faded');
     adForm.classList.remove('ad-form--disabled');
     window.checkGuestsNumber();
+    //
+    pinMain.removeEventListener('keydown', pinMainEnterHandler);
   }
   window.switchPageToActiveState = switchPageToActiveState;
 
