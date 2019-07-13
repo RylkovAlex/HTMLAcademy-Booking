@@ -71,11 +71,11 @@
     });
     if (matches) {
       action();
+      return false;
     } else {
       window.createErrorMessage('Неправильный тип файла! Поддерживаемые форматы: gif, jpg, jpeg, png');
       return true;
     }
-    return false;
   }
 
   function setDataUrlSrc(file, img) {
