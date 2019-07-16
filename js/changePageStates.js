@@ -1,6 +1,8 @@
 'use strict';
 
 (function () {
+  var PIN_MAIN_MARKER_TRANSLATE_Y = -6; // transform у псевдоэлемента, для вычисления точных размеров метки
+
   // основная форма для создания объявления
   var adForm = document.querySelector('.ad-form');
   var adFormHeader = adForm.querySelector('.ad-form-header');
@@ -14,7 +16,6 @@
   // Карта и параметры меток
   var mapBlock = document.querySelector('.map');
   var pinMain = mapBlock.querySelector('.map__pin--main');
-  var PIN_MAIN_MARKER_TRANSLATE_Y = -6; // transform у псевдоэлемента, для вычисления точных размеров метки
   var pinMainHeight = pinMain.offsetHeight + parseInt(getComputedStyle(pinMain, '::after').height, 10) + PIN_MAIN_MARKER_TRANSLATE_Y;
   var pinMainLocationX;
   var pinMainLocationY;
@@ -73,24 +74,26 @@
   // записывает координаты главной метки в input с адресом
   function writePinMainLocationToInput() {
     // вычислеие координат главной метки
-    if (window.isPageActive) {
-      pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
-      pinMainLocationY = Math.floor(pinMain.offsetTop + pinMainHeight);
-    } else {
-      pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
-      pinMainLocationY = Math.floor(pinMain.offsetTop + pinMain.offsetHeight / 2);
-    }
+    pinMainLocationX = Math.floor(pinMain.offsetLeft + pinMain.offsetWidth / 2);
+    pinMainLocationY = (window.isPageActive) ?
+      Math.floor(pinMain.offsetTop + pinMainHeight) :
+      Math.floor(pinMain.offsetTop + pinMain.offsetHeight / 2);
     // запись в инпут
     adFormAddress.value = pinMainLocationX + ',' + pinMainLocationY;
   }
 
   // переход в исходное (неактивное состояние страницы)
   function switchPageToInitialState() {
+    window.adsDefaultData = undefined;
     window.isPageActive = false;
     window.adFormPhotos = [];
     setPinMainDefaultPosition();
+    // убираю пины
     window.deletePins();
-    writePinMainLocationToInput();
+    // убираю карточку
+    if (document.querySelector('.map__card')) {
+      document.querySelector('.map__card').remove();
+    }
     adFormHeader.disabled = true;
     function setDisabledTrue(it) {
       it.disabled = true;
@@ -117,6 +120,8 @@
     for (var i = 1; i < adsPhotos.length; i++) {
       adsPhotos[i].remove();
     }
+    //
+    writePinMainLocationToInput();
     //
     mapBlock.classList.add('map--faded');
     adForm.classList.add('ad-form--disabled');

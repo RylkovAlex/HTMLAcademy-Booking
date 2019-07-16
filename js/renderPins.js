@@ -2,6 +2,8 @@
 (function () {
   var MAP_PIN_WIDTH = 50;
   var MAP_PIN_HEIGHT = 70;
+  var QUANTITY = 5; // максимальное кол-во отображаемых пинов
+
   var mapBlock = document.querySelector('.map');
   var pinMain = mapBlock.querySelector('.map__pin--main');
 
@@ -29,7 +31,7 @@
 
     function pinMainMouseupHandler() {
       // движение закончилось: делаем запрос на сервер и вставляем новые метки на карту
-      if (wasPinMoved) {
+      if (wasPinMoved && window.adsDefaultData === undefined) {
         window.backend.load(successHandler, createErrorMessage);
       }
       document.removeEventListener('mouseup', pinMainMouseupHandler);
@@ -64,20 +66,19 @@
       errorBlock.remove();
     });
 
-    document.addEventListener('click', documentClickHandler);
+    document.addEventListener('click', removeErrorMessage);
     document.addEventListener('keydown', documentKeydownHandler);
 
-    function documentClickHandler() {
-      errorBlock.remove();
-      document.removeEventListener('click', documentClickHandler);
-      document.removeEventListener('keydown', documentKeydownHandler);
-    }
     function documentKeydownHandler(evt) {
       window.util.isEscEvent(evt, function () {
-        errorBlock.remove();
-        document.removeEventListener('keydown', documentKeydownHandler);
-        document.removeEventListener('click', documentClickHandler);
+        removeErrorMessage();
       });
+    }
+
+    function removeErrorMessage() {
+      errorBlock.remove();
+      document.removeEventListener('keydown', documentKeydownHandler);
+      document.removeEventListener('click', removeErrorMessage);
     }
   }
 
@@ -86,7 +87,7 @@
   // обрабатывает успешный ответ с сервера
   function successHandler(data) {
     getAdsData(data);
-    insertPinsFragment(window.adsDefaultData, 5);
+    insertPinsFragment(window.adsDefaultData, QUANTITY);
   }
 
   // Запоминает данные с сервера

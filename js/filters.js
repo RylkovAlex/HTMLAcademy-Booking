@@ -2,10 +2,11 @@
 (function () {
   var LOW_PRICE = 10000;
   var HIGH_PRICE = 50000;
+  var QUANTITY = 5; // максимальное кол-во отображаемых пинов
+
   // форма для фильтрации
   var filtersContainer = document.querySelector('.map__filters-container');
   var filters = filtersContainer.querySelectorAll('.map__filter');
-  var quantity = 5; // максимальное кол-во отображаемых пинов
   // сами фильтры
   var housingType = filtersContainer.querySelector('#housing-type');
   var housingPrice = filtersContainer.querySelector('#housing-price');
@@ -38,17 +39,13 @@
     adsFilteredData = filterFeatures(adsFilteredData);
 
     window.deletePins();
-    window.insertPinsFragment(adsFilteredData, quantity);
+    window.insertPinsFragment(adsFilteredData, QUANTITY);
   }
 
   function filterData(data, value, offerKey) {
-    if (value === 'any') {
-      return data;
-    }
-    var filteredData = data.filter(function (it) {
+    return (value === 'any') ? data : data.filter(function (it) {
       return (it.offer[offerKey].toString() === value.toString());
     });
-    return filteredData;
   }
 
   function filterHousingPrice(data, value) {
@@ -63,11 +60,7 @@
         return (it.offer.price > HIGH_PRICE);
       }
     };
-    if (value === 'any') {
-      return data;
-    }
-    var filteredData = data.filter(filterCbToValue[value]);
-    return filteredData;
+    return (value === 'any') ? data : data.filter(filterCbToValue[value]);
   }
 
   function filterFeatures(data) {

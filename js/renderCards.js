@@ -96,10 +96,9 @@
     }
     // определяет содержимое для блока capacity
     function getCapacity() {
-      if (data.offer.rooms) {
-        return (data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей');
-      }
-      return ('Комнат нет!');
+      return (data.offer.rooms) ?
+        (data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей') :
+        ('Комнат нет!');
     }
     // заполняет контентом элементы карточки
     function setElementContent(element, key, elementData) {
