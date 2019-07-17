@@ -84,7 +84,7 @@
 
   // переход в исходное (неактивное состояние страницы)
   function switchPageToInitialState() {
-    window.adsDefaultData = undefined;
+    window.adsDefaultData = null;
     window.isPageActive = false;
     window.adFormPhotos = [];
     setPinMainDefaultPosition();

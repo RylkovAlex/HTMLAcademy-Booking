@@ -31,7 +31,7 @@
 
     function pinMainMouseupHandler() {
       // движение закончилось: делаем запрос на сервер и вставляем новые метки на карту
-      if (wasPinMoved && window.adsDefaultData === undefined) {
+      if (wasPinMoved && window.adsDefaultData === null) {
         window.backend.load(successHandler, createErrorMessage);
       }
       document.removeEventListener('mouseup', pinMainMouseupHandler);
