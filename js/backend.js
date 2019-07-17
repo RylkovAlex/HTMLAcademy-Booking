@@ -3,6 +3,7 @@
 window.backend = (function () {
   var POST_URL = 'https://js.dump.academy/keksobooking';
   var GET_URL = 'https://js.dump.academy/keksobooking/data';
+  var TIME_OUT = 10000; // 10s
 
   return {
     load: function (onLoad, onError) {
@@ -59,7 +60,7 @@ window.backend = (function () {
       errorAction('Запрос не успел выполниться за ' + xhr.timeout + 'мс');
     });
 
-    xhr.timeout = 10000; // 10s
+    xhr.timeout = TIME_OUT;
   }
 
 })();
